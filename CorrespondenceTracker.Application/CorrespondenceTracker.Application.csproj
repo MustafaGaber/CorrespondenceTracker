@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CorrespondenceTracker.Data\CorrespondenceTracker.Data.csproj" />
+    <ProjectReference Include="..\CorrespondenceTracker.Domain\CorrespondenceTracker.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
