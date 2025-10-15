@@ -49,6 +49,10 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty; // 👈 opens at the root URL
     });
 }
+app.UseCors(x => x.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                );
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

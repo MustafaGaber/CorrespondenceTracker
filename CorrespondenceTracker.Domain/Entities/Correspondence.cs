@@ -23,6 +23,9 @@ namespace CorrespondenceTracker.Domain.Entities
         public Guid? AssignedUserId { get; private set; }
         public virtual User? AssignedUser { get; private set; }
 
+        public Guid? SubjectId { get; private set; }
+        public virtual Subject? Subject { get; private set; }
+
         public string? Notes { get; private set; }
         public bool IsClosed { get; private set; }
         public Guid? MainFileId { get; private set; }
@@ -31,8 +34,14 @@ namespace CorrespondenceTracker.Domain.Entities
         private readonly List<FollowUp> _followUps = new();
         public virtual IReadOnlyList<FollowUp> FollowUps => _followUps.ToList();
 
+        private readonly List<Classification> _classifications = new();
+        public virtual IReadOnlyList<Classification> Classifications => _classifications.ToList();
+
         private readonly List<Attachment> _attachments = new();
         public virtual IReadOnlyList<Attachment> Attachments => _attachments.ToList();
+
+        private readonly List<Reminder> _reminders = new();
+        public virtual IReadOnlyList<Reminder> Reminders => _reminders.ToList();
 
         // Protected constructor for ORM
         protected Correspondence() { }
@@ -52,14 +61,25 @@ namespace CorrespondenceTracker.Domain.Entities
             Guid? assignedUserId = null,
             string? notes = null,
             Guid? mainFileId = null,
-            bool isClosed = false)
+            bool isClosed = false,
+            Guid? subjectId = null,
+            IEnumerable<Classification>? classifications = null)
         {
-            Direction = Guard.Against.EnumOutOfRange(direction, nameof(direction));
-            IncomingNumber = Guard.Against.NullOrWhiteSpace(incomingNumber, nameof(incomingNumber));
-            IncomingDate = Guard.Against.Null(incomingDate, nameof(incomingDate));
-            CorrespondentId = Guard.Against.Default(correspondentId, nameof(correspondentId));
-            PriorityLevel = Guard.Against.EnumOutOfRange(priorityLevel, nameof(priorityLevel));
+            ApplyValidations(
+                direction,
+                priorityLevel,
+                incomingNumber,
+                incomingDate,
+                outgoingNumber,
+                outgoingDate,
+                correspondentId
+            );
 
+            Direction = direction;
+            PriorityLevel = priorityLevel;
+            IncomingNumber = incomingNumber;
+            IncomingDate = incomingDate;
+            CorrespondentId = correspondentId;
             OutgoingNumber = outgoingNumber;
             OutgoingDate = outgoingDate;
             DepartmentId = departmentId;
@@ -69,25 +89,92 @@ namespace CorrespondenceTracker.Domain.Entities
             Notes = notes;
             MainFileId = mainFileId;
             IsClosed = isClosed;
+            SubjectId = subjectId;
+
+            if (classifications != null)
+            {
+                foreach (var c in classifications)
+                {
+                    _classifications.Add(c);
+                }
+            }
+        }
+
+        // ✅ New Update method with full validations
+        public void Update(
+            string incomingNumber,
+            DateOnly incomingDate,
+            string? outgoingNumber,
+            DateOnly? outgoingDate,
+            Guid? departmentId,
+            string? content,
+            string? summary,
+            Guid? assignedUserId,
+            string? notes,
+            bool isClosed,
+            Guid? subjectId,
+            IEnumerable<Classification>? classifications = null,
+            CorrespondenceDirection? direction = null,
+            PriorityLevel? priorityLevel = null)
+        {
+            var newDirection = direction ?? Direction;
+            var newPriority = priorityLevel ?? PriorityLevel;
+
+            ApplyValidations(
+                newDirection,
+                newPriority,
+                incomingNumber,
+                incomingDate,
+                outgoingNumber,
+                outgoingDate,
+                CorrespondentId // CorrespondentId is immutable after creation
+            );
+
+            Direction = newDirection;
+            PriorityLevel = newPriority;
+            IncomingNumber = incomingNumber;
+            IncomingDate = incomingDate;
+            OutgoingNumber = outgoingNumber;
+            OutgoingDate = outgoingDate;
+            DepartmentId = departmentId;
+            Content = content;
+            Summary = summary;
+            AssignedUserId = assignedUserId;
+            Notes = notes;
+            IsClosed = isClosed;
+            SubjectId = subjectId;
+
+            // Reset and replace classifications
+            _classifications.Clear();
+            if (classifications != null)
+            {
+                foreach (var c in classifications)
+                {
+                    _classifications.Add(c);
+                }
+            }
+        }
+
+        // ✅ Private shared validation logic
+        private static void ApplyValidations(
+            CorrespondenceDirection direction,
+            PriorityLevel priorityLevel,
+            string incomingNumber,
+            DateOnly incomingDate,
+            string? outgoingNumber,
+            DateOnly? outgoingDate,
+            Guid correspondentId)
+        {
+            Guard.Against.EnumOutOfRange(direction, nameof(direction));
+            Guard.Against.EnumOutOfRange(priorityLevel, nameof(priorityLevel));
+            Guard.Against.NullOrWhiteSpace(incomingNumber, nameof(incomingNumber));
+            Guard.Against.Null(incomingDate, nameof(incomingDate));
+            Guard.Against.Default(correspondentId, nameof(correspondentId));
 
             if (outgoingDate.HasValue && outgoingDate.Value < incomingDate)
             {
                 throw new ArgumentException("Outgoing date cannot be earlier than incoming date");
             }
-        }
-
-        public void CopyFrom(Correspondence other)
-        {
-            IncomingNumber = other.IncomingNumber;
-            IncomingDate = other.IncomingDate;
-            CorrespondentId = other.CorrespondentId;
-            OutgoingNumber = other.OutgoingNumber;
-            OutgoingDate = other.OutgoingDate;
-            DepartmentId = other.DepartmentId;
-            Summary = other.Summary;
-            Notes = other.Notes;
-            AssignedUserId = other.AssignedUserId;
-            MainFileId = other.MainFileId;
         }
     }
 

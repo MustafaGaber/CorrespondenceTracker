@@ -18,6 +18,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 .Include(l => l.Correspondent)
                 .Include(l => l.Department)
                 .Include(l => l.AssignedUser)
+                .Include(l => l.Classifications)
                 .AsQueryable();
 
             // Apply filters
@@ -83,12 +84,29 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 IncomingDate = correspondence.IncomingDate ?? DateOnly.MinValue,
                 OutgoingNumber = correspondence.OutgoingNumber,
                 OutgoingDate = correspondence.OutgoingDate,
-                CorrespondentName = correspondence.Correspondent?.Name ?? string.Empty,
-                DepartmentName = correspondence.Department?.Name,
+                Correspondent = correspondence.Correspondent != null ? new CorrespondentDto
+                {
+                    Id = correspondence.Correspondent.Id,
+                    Name = correspondence.Correspondent.Name
+                } : null,
+                Department = correspondence.Department != null ? new DepartmentDto
+                {
+                    Id = correspondence.Department.Id,
+                    Name = correspondence.Department.Name
+                } : null,
                 Summary = correspondence.Summary,
-                AssignedUserName = correspondence.AssignedUser?.FullName,
+                AssignedUser = correspondence.AssignedUser != null ? new UserDto
+                {
+                    Id = correspondence.AssignedUser.Id,
+                    Name = correspondence.AssignedUser.FullName
+                } : null,
                 IsClosed = correspondence.IsClosed,
-                CreatedAt = correspondence.CreatedAt
+                CreatedAt = correspondence.CreatedAt,
+                Classifications = correspondence.Classifications.Select(c => new ClassificationDto
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                }).ToList()
             }).ToList();
         }
     }

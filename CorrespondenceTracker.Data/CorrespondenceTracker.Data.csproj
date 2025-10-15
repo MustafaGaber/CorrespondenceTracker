@@ -15,4 +15,8 @@
     <ProjectReference Include="..\CorrespondenceTracker.Domain\CorrespondenceTracker.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

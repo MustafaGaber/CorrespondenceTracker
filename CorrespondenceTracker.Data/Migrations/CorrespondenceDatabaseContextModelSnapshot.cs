@@ -22,6 +22,21 @@ namespace CorrespondenceTracker.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ClassificationCorrespondence", b =>
+                {
+                    b.Property<Guid>("ClassificationsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CorrespondencesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ClassificationsId", "CorrespondencesId");
+
+                    b.HasIndex("CorrespondencesId");
+
+                    b.ToTable("ClassificationCorrespondence");
+                });
+
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Attachment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -34,8 +49,8 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("Date")
+                        .HasColumnType("date");
 
                     b.Property<Guid>("FileRecordId")
                         .HasColumnType("uniqueidentifier");
@@ -46,8 +61,7 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Note")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -61,6 +75,27 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.ToTable("Attachments", (string)null);
                 });
 
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Classification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Classifications", (string)null);
+                });
+
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Correspondence", b =>
                 {
                     b.Property<Guid>("Id")
@@ -71,7 +106,7 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .HasColumnType("NVARCHAR(MAX)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CorrespondentId")
                         .HasColumnType("uniqueidentifier");
@@ -85,13 +120,12 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("IncomingDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("IncomingDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("IncomingNumber")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("IsClosed")
                         .HasColumnType("bit");
@@ -102,19 +136,21 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("OutgoingDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly?>("OutgoingDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("OutgoingNumber")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Summary")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -134,6 +170,12 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasIndex("IncomingNumber");
 
                     b.HasIndex("MainFileId");
+
+                    b.HasIndex("OutgoingDate");
+
+                    b.HasIndex("OutgoingNumber");
+
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Correspondences", (string)null);
                 });
@@ -198,16 +240,16 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.Property<string>("ContentType")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Extension")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -227,8 +269,6 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt");
-
                     b.ToTable("FileRecords", (string)null);
                 });
 
@@ -244,8 +284,8 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<string>("Details")
                         .IsRequired()
@@ -262,11 +302,73 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasIndex("CorrespondenceId");
 
-                    b.HasIndex("Date");
-
                     b.HasIndex("FileRecordId");
 
                     b.ToTable("FollowUps", (string)null);
+                });
+
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Reminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CorrespondenceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDismissed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("RemindTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("SendEmailMessage")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CorrespondenceId");
+
+                    b.HasIndex("RemindTime");
+
+                    b.ToTable("Reminders", (string)null);
+                });
+
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Subject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.User", b =>
@@ -280,8 +382,8 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("JobTitle")
                         .HasMaxLength(200)
@@ -295,6 +397,21 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasIndex("FullName");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("ClassificationCorrespondence", b =>
+                {
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.Classification", null)
+                        .WithMany()
+                        .HasForeignKey("ClassificationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.Correspondence", null)
+                        .WithMany()
+                        .HasForeignKey("CorrespondencesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Attachment", b =>
@@ -339,6 +456,11 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasForeignKey("MainFileId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("AssignedUser");
 
                     b.Navigation("Correspondent");
@@ -346,6 +468,8 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("MainFile");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.FollowUp", b =>
@@ -366,11 +490,24 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Navigation("FileRecord");
                 });
 
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Reminder", b =>
+                {
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.Correspondence", "Correspondence")
+                        .WithMany("Reminders")
+                        .HasForeignKey("CorrespondenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Correspondence");
+                });
+
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Correspondence", b =>
                 {
                     b.Navigation("Attachments");
 
                     b.Navigation("FollowUps");
+
+                    b.Navigation("Reminders");
                 });
 #pragma warning restore 612, 618
         }

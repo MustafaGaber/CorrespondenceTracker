@@ -11,11 +11,36 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
         public DateOnly IncomingDate { get; set; }
         public string? OutgoingNumber { get; set; }
         public DateOnly? OutgoingDate { get; set; }
-        public string CorrespondentName { get; set; } = string.Empty;
-        public string? DepartmentName { get; set; }
+        public CorrespondentDto? Correspondent { get; set; }
+        public DepartmentDto? Department { get; set; }
         public string? Summary { get; set; }
-        public string? AssignedUserName { get; set; }
+        public UserDto? AssignedUser { get; set; }
         public bool IsClosed { get; set; }
         public DateTime CreatedAt { get; set; }
+        public List<ClassificationDto> Classifications { get; set; } = new();
+    }
+
+    public class CorrespondentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class DepartmentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class UserDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class ClassificationDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

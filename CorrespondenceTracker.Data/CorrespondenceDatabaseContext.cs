@@ -1,6 +1,5 @@
 ﻿using CorrespondenceTracker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 namespace CorrespondenceTracker.Data
@@ -27,7 +26,10 @@ namespace CorrespondenceTracker.Data
         public DbSet<Department> Departments { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Correspondent> Correspondents { get; set; }
-        public DbSet<Domain.Entities.FileRecord> FileRecords { get; set; }
+        public DbSet<Classification> Classifications { get; set; }
+        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<FileRecord> FileRecords { get; set; }
+        public DbSet<Reminder> Reminders { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -53,35 +55,29 @@ namespace CorrespondenceTracker.Data
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<Correspondent>().ToTable("Correspondents");
             modelBuilder.Entity<FileRecord>().ToTable("FileRecords");
-
-            // DateOnly converter
-            var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
-                d => d.ToDateTime(TimeOnly.MinValue),
-                dt => DateOnly.FromDateTime(dt)
-            );
-
-            var nullableDateOnlyConverter = new ValueConverter<DateOnly?, DateTime?>(
-                d => d.HasValue ? d.Value.ToDateTime(TimeOnly.MinValue) : null,
-                dt => dt.HasValue ? DateOnly.FromDateTime(dt.Value) : null
-            );
+            modelBuilder.Entity<Classification>().ToTable("Classifications");
+            modelBuilder.Entity<Subject>().ToTable("Subjects");
+            modelBuilder.Entity<Reminder>().ToTable("Reminders");
 
             // Correspondences configuration
             modelBuilder.Entity<Correspondence>(b =>
             {
                 b.HasKey(x => x.Id);
-                b.Property(x => x.IncomingNumber).IsRequired().HasMaxLength(200);
-                b.Property(x => x.IncomingDate).HasConversion(dateOnlyConverter).IsRequired();
-                b.Property(x => x.OutgoingNumber).HasMaxLength(200);
-                b.Property(x => x.OutgoingDate).HasConversion(nullableDateOnlyConverter);
-                b.Property(x => x.Content).HasColumnType("NVARCHAR(MAX)"); // SQL Server large text
-                b.Property(x => x.Summary).HasMaxLength(2000);
-                b.Property(x => x.Direction).IsRequired();
-                b.Property(x => x.PriorityLevel).IsRequired();
+                b.Property(x => x.IncomingNumber).HasMaxLength(50);
+                b.Property(x => x.OutgoingNumber).HasMaxLength(50);
 
                 b.HasOne(x => x.Correspondent)
                     .WithMany()
                     .HasForeignKey(x => x.CorrespondentId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasMany(x => x.Classifications)
+                 .WithMany(c => c.Correspondences);
+
+                b.HasOne(x => x.Subject)
+                  .WithMany()
+                  .HasForeignKey(x => x.SubjectId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
                 b.HasOne(x => x.Department)
                     .WithMany()
@@ -101,7 +97,8 @@ namespace CorrespondenceTracker.Data
                 // Indexes for better performance
                 b.HasIndex(x => x.IncomingNumber);
                 b.HasIndex(x => x.IncomingDate);
-                b.HasIndex(x => x.CorrespondentId);
+                b.HasIndex(x => x.OutgoingNumber);
+                b.HasIndex(x => x.OutgoingDate);
                 b.HasIndex(x => x.Direction);
             });
 
@@ -109,7 +106,6 @@ namespace CorrespondenceTracker.Data
             modelBuilder.Entity<FollowUp>(b =>
             {
                 b.HasKey(x => x.Id);
-                b.Property(x => x.Date).HasConversion(dateOnlyConverter).IsRequired();
                 b.Property(x => x.Details).HasMaxLength(4000);
                 b.HasOne(x => x.Correspondence)
                     .WithMany(x => x.FollowUps)
@@ -119,9 +115,6 @@ namespace CorrespondenceTracker.Data
                     .WithMany()
                     .HasForeignKey(x => x.FileRecordId)
                     .OnDelete(DeleteBehavior.SetNull);
-
-                b.HasIndex(x => x.CorrespondenceId);
-                b.HasIndex(x => x.Date);
             });
 
             // Attachments configuration
@@ -129,8 +122,7 @@ namespace CorrespondenceTracker.Data
             {
                 b.HasKey(x => x.Id);
                 b.Property(x => x.Name).IsRequired().HasMaxLength(500);
-                b.Property(x => x.Note).HasMaxLength(2000);
-                b.Property(x => x.Date).HasConversion(nullableDateOnlyConverter);
+                b.Property(x => x.Note);
                 b.HasOne(x => x.Correspondence)
                     .WithMany(x => x.Attachments)
                     .HasForeignKey(x => x.CorrespondenceId)
@@ -139,8 +131,6 @@ namespace CorrespondenceTracker.Data
                     .WithMany()
                     .HasForeignKey(x => x.FileRecordId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                b.HasIndex(x => x.CorrespondenceId);
             });
 
             // Departments configuration
@@ -151,11 +141,18 @@ namespace CorrespondenceTracker.Data
                 b.HasIndex(x => x.Name).IsUnique();
             });
 
+            modelBuilder.Entity<Reminder>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Message).HasMaxLength(500);
+                b.HasIndex(x => x.RemindTime);
+            });
+
             // Users configuration
             modelBuilder.Entity<User>(b =>
             {
                 b.HasKey(x => x.Id);
-                b.Property(x => x.FullName).IsRequired().HasMaxLength(300);
+                b.Property(x => x.FullName).IsRequired().HasMaxLength(100);
                 b.Property(x => x.JobTitle).HasMaxLength(200);
                 b.HasIndex(x => x.FullName);
             });
@@ -169,17 +166,14 @@ namespace CorrespondenceTracker.Data
             });
 
             // FileRecords configuration
-            modelBuilder.Entity<Domain.Entities.FileRecord>(b =>
+            modelBuilder.Entity<FileRecord>(b =>
             {
                 b.HasKey(x => x.Id);
                 b.Property(x => x.FileName).IsRequired().HasMaxLength(500);
                 b.Property(x => x.RelativePath).IsRequired().HasMaxLength(1000);
-                b.Property(x => x.ContentType).HasMaxLength(200);
-                b.Property(x => x.Extension).HasMaxLength(20);
+                b.Property(x => x.ContentType).HasMaxLength(30);
+                b.Property(x => x.Extension).HasMaxLength(10);
                 b.Property(x => x.Size);
-                b.Property(x => x.CreatedAt).IsRequired();
-
-                b.HasIndex(x => x.CreatedAt);
             });
 
             base.OnModelCreating(modelBuilder);

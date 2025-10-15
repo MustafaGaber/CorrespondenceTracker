@@ -1,5 +1,6 @@
 ﻿using CorrespondenceTracker.Data;
 using CorrespondenceTracker.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorrespondence
 {
@@ -14,24 +15,30 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
 
         public async Task<Guid> Execute(CreateCorrespondenceRequest model)
         {
-            // Validate required relationships
-            var correspondent = await _context.Correspondents.FindAsync(model.SenderId);
-            if (correspondent == null)
-                throw new ArgumentException($"Correspondent with ID {model.SenderId} not found");
+            var correspondent = await _context.Correspondents.FindAsync(model.SenderId)
+                ?? throw new ArgumentException($"Correspondent with ID {model.SenderId} not found");
 
-            // Validate optional relationships
-            if (model.DepartmentId.HasValue)
+            if (model.DepartmentId.HasValue &&
+                await _context.Departments.FindAsync(model.DepartmentId.Value) == null)
+                throw new ArgumentException($"Department with ID {model.DepartmentId} not found");
+
+            if (model.AssignedUserId.HasValue &&
+                await _context.Users.FindAsync(model.AssignedUserId.Value) == null)
+                throw new ArgumentException($"User with ID {model.AssignedUserId} not found");
+
+            Subject? subject = null;
+            if (model.SubjectId.HasValue)
             {
-                var department = await _context.Departments.FindAsync(model.DepartmentId.Value);
-                if (department == null)
-                    throw new ArgumentException($"Department with ID {model.DepartmentId} not found");
+                subject = await _context.Subjects.FindAsync(model.SubjectId.Value)
+                    ?? throw new ArgumentException($"Subject with ID {model.SubjectId} not found");
             }
 
-            if (model.AssignedUserId.HasValue)
+            List<Classification>? classifications = null;
+            if (model.ClassificationIds?.Any() == true)
             {
-                var assignedUser = await _context.Users.FindAsync(model.AssignedUserId.Value);
-                if (assignedUser == null)
-                    throw new ArgumentException($"User with ID {model.AssignedUserId} not found");
+                classifications = await _context.Classifications
+                    .Where(c => model.ClassificationIds.Contains(c.Id))
+                    .ToListAsync();
             }
 
             var correspondence = new Correspondence(
@@ -48,13 +55,16 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 assignedUserId: model.AssignedUserId,
                 notes: model.Notes,
                 mainFileId: null,
-                isClosed: model.IsClosed
+                isClosed: model.IsClosed,
+                subjectId: model.SubjectId,
+                classifications: classifications
             );
 
             _context.Correspondences.Add(correspondence);
             await _context.SaveChangesAsync();
             return correspondence.Id;
         }
+
     }
 
     public interface ICreateCorrespondenceCommand
