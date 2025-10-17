@@ -20,5 +20,11 @@ namespace CorrespondenceTracker.Domain.Entities
             FullName = Guard.Against.NullOrWhiteSpace(fullName, nameof(fullName));
             JobTitle = jobTitle;
         }
+
+        public void Update(string fullName, string? jobTitle = null)
+        {
+            FullName = Guard.Against.NullOrWhiteSpace(fullName, nameof(fullName));
+            JobTitle = jobTitle;
+        }
     }
 }

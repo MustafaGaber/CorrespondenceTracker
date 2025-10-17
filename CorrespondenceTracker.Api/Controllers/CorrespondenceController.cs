@@ -58,6 +58,5 @@ namespace CorrespondenceTracker.Api.Controllers
             await _deleteCorrespondenceCommand.Execute(id);
             return Ok();
         }
-
     }
 }

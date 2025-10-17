@@ -1,4 +1,5 @@
-﻿using CorrespondenceTracker.Data;
+﻿using CorrespondenceTracker.Application.Interfaces;
+using CorrespondenceTracker.Data;
 using CorrespondenceTracker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,11 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
     public class CreateCorrespondenceCommand : ICreateCorrespondenceCommand
     {
         private readonly CorrespondenceDatabaseContext _context;
-
-        public CreateCorrespondenceCommand(CorrespondenceDatabaseContext context)
+        private readonly IFileService _fileService;
+        public CreateCorrespondenceCommand(CorrespondenceDatabaseContext context, IFileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         public async Task<Guid> Execute(CreateCorrespondenceRequest model)
@@ -41,6 +43,16 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                     .ToListAsync();
             }
 
+            if (model.File != null)
+            {
+                FileData fileData = await _fileService.UploadDocument(
+                   model.File, "Correspondence");
+                // 
+
+
+
+
+            }
             var correspondence = new Correspondence(
                 direction: model.Direction ?? CorrespondenceDirection.Incoming,
                 priorityLevel: PriorityLevel.Medium,

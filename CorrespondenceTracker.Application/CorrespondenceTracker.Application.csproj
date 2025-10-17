@@ -7,12 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CorrespondenceTracker.Data\CorrespondenceTracker.Data.csproj" />
     <ProjectReference Include="..\CorrespondenceTracker.Domain\CorrespondenceTracker.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Attachments\Commands\" />
+    <Folder Include="Attachments\Queries\" />
+    <Folder Include="Classifications\Commands\" />
+    <Folder Include="Classifications\Queries\" />
+    <Folder Include="Correspondents\Commands\" />
+    <Folder Include="Correspondents\Queries\" />
+    <Folder Include="FollowUps\Commands\" />
+    <Folder Include="FollowUps\Queries\" />
+    <Folder Include="Reminders\Commands\" />
+    <Folder Include="Reminders\Queries\" />
+    <Folder Include="Subjects\Commands\" />
+    <Folder Include="Subjects\Queries\" />
+    <Folder Include="Users\Queries\GetUser\" />
+    <Folder Include="Users\Queries\GetUsers\" />
   </ItemGroup>
 
 </Project>

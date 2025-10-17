@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Files\" />
+    <ProjectReference Include="..\CorrespondenceTracker.Application\CorrespondenceTracker.Application.csproj" />
+    <ProjectReference Include="..\CorrespondenceTracker.Domain\CorrespondenceTracker.Domain.csproj" />
   </ItemGroup>
 
 </Project>

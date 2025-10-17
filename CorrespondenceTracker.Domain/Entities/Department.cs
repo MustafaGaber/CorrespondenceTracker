@@ -18,5 +18,10 @@ namespace CorrespondenceTracker.Domain.Entities
         {
             Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
         }
+
+        public void Update(string name)
+        {
+            Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
+        }
     }
 }
