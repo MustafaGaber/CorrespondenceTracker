@@ -5,7 +5,7 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubjects
 {
     public interface IGetSubjectsQuery
     {
-        Task<IEnumerable<GetSubjectResponse>> Execute(GetSubjectsFilterModel filter);
+        Task<IEnumerable<GetSubjectResponse>> Execute();
     }
 
     public class GetSubjectsQuery : IGetSubjectsQuery
@@ -17,18 +17,10 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubjects
             _context = context;
         }
 
-        public async Task<IEnumerable<GetSubjectResponse>> Execute(GetSubjectsFilterModel filter)
+        public async Task<IEnumerable<GetSubjectResponse>> Execute()
         {
-            var query = _context.Subjects.AsQueryable();
-
-            if (!string.IsNullOrEmpty(filter.SearchTerm))
-            {
-                query = query.Where(s => s.Name.Contains(filter.SearchTerm));
-            }
-
-            var subjects = await query
-                .Skip((filter.Page - 1) * filter.PageSize)
-                .Take(filter.PageSize)
+            var subjects = await _context.Subjects
+                .OrderBy(s => s.Name)
                 .ToListAsync();
 
             return subjects.Select(s => new GetSubjectResponse

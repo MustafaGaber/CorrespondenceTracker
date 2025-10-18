@@ -12,6 +12,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
         public string? OutgoingNumber { get; set; }
         public DateOnly? OutgoingDate { get; set; }
         public CorrespondentDto? Correspondent { get; set; }
+        public SubjectDto? Subject { get; set; }
         public DepartmentDto? Department { get; set; }
         public string? Summary { get; set; }
         public UserDto? AssignedUser { get; set; }
@@ -27,6 +28,12 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
     }
 
     public class DepartmentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class SubjectDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;

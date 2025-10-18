@@ -27,14 +27,23 @@ namespace CorrespondenceTracker.Api.Controllers
             _deleteDepartmentCommand = deleteDepartmentCommand;
         }
 
-        [HttpPost] // Search
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var result = await _getDepartmentsQuery.Execute();
             return Ok(result);
         }
 
-        [HttpPost("Create")]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDepartment(Guid id)
+        {
+            var result = await _getDepartmentsQuery.GetById(id);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentRequest request)
         {
             var result = await _createDepartmentCommand.Execute(request);

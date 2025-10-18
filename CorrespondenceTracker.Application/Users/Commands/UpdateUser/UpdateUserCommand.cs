@@ -16,14 +16,10 @@ namespace CorrespondenceTracker.Application.Users.Commands.UpdateUser
 
         public async Task Execute(Guid id, CreateUserRequest model)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-                throw new ArgumentException($"User with ID {id} not found");
+            var user = await _context.Users.FindAsync(id)
+                ?? throw new ArgumentException($"User with ID {id} not found");
 
-            // Since User doesn't have an Update method, we'll update properties directly
-            // In a real scenario, you'd want to add an Update method to the User entity
-            var updatedUser = new User(model.FullName, model.JobTitle) { Id = id };
-            _context.Entry(user).CurrentValues.SetValues(updatedUser);
+            user.Update(model.FullName, model.JobTitle);
             await _context.SaveChangesAsync();
         }
     }

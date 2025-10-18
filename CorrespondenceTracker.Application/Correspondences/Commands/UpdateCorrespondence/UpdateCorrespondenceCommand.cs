@@ -1,4 +1,5 @@
 ﻿using CorrespondenceTracker.Data;
+using CorrespondenceTracker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorrespondence
@@ -21,6 +22,21 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
             if (correspondence == null)
                 throw new ArgumentException($"Correspondence with ID {id} not found");
 
+            List<Classification>? classifications = null;
+            if (model.ClassificationIds?.Any() == true)
+            {
+                classifications = await _context.Classifications
+                    .Where(c => model.ClassificationIds.Contains(c.Id))
+                    .ToListAsync();
+
+                // Validate that all classification IDs were found
+                if (classifications.Count != model.ClassificationIds.Count)
+                {
+                    var foundIds = classifications.Select(c => c.Id).ToList();
+                    var missingIds = model.ClassificationIds.Except(foundIds).ToList();
+                    throw new ArgumentException($"Classifications with IDs {string.Join(", ", missingIds)} not found");
+                }
+            }
             // Update scalar properties
             correspondence.Update(
                 model.IncomingNumber,
@@ -34,7 +50,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 model.Notes,
                 model.IsClosed,
                 model.SubjectId,
-                [] // classifications
+                classifications
             );
 
             await _context.SaveChangesAsync();

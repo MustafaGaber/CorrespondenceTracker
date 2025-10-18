@@ -19,6 +19,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 .Include(l => l.Department)
                 .Include(l => l.AssignedUser)
                 .Include(l => l.Classifications)
+                .Include(l => l.Subject)
                 .AsQueryable();
 
             // Apply filters
@@ -99,6 +100,11 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 {
                     Id = correspondence.AssignedUser.Id,
                     Name = correspondence.AssignedUser.FullName
+                } : null,
+                Subject = correspondence.Subject != null ? new SubjectDto
+                {
+                    Id = correspondence.Subject.Id,
+                    Name = correspondence.Subject.Name
                 } : null,
                 IsClosed = correspondence.IsClosed,
                 CreatedAt = correspondence.CreatedAt,

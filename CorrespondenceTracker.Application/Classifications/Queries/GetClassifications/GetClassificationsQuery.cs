@@ -5,7 +5,7 @@ namespace CorrespondenceTracker.Application.Classifications.Queries.GetClassific
 {
     public interface IGetClassificationsQuery
     {
-        Task<IEnumerable<GetClassificationResponse>> Execute(GetClassificationsFilterModel filter);
+        Task<IEnumerable<GetClassificationResponse>> Execute();
     }
 
     public class GetClassificationsQuery : IGetClassificationsQuery
@@ -17,19 +17,9 @@ namespace CorrespondenceTracker.Application.Classifications.Queries.GetClassific
             _context = context;
         }
 
-        public async Task<IEnumerable<GetClassificationResponse>> Execute(GetClassificationsFilterModel filter)
+        public async Task<IEnumerable<GetClassificationResponse>> Execute()
         {
-            var query = _context.Classifications.AsQueryable();
-
-            if (!string.IsNullOrEmpty(filter.SearchTerm))
-            {
-                query = query.Where(c => c.Name.Contains(filter.SearchTerm));
-            }
-
-            var classifications = await query
-                .Skip((filter.Page - 1) * filter.PageSize)
-                .Take(filter.PageSize)
-                .ToListAsync();
+            var classifications = await _context.Classifications.ToListAsync();
 
             return classifications.Select(c => new GetClassificationResponse
             {

@@ -13,11 +13,15 @@ namespace CorrespondenceTracker.Domain.Entities
         // Protected constructor for ORM
         protected Classification()
         {
-            Name = string.Empty;
         }
 
         // Public constructor
         public Classification(string name)
+        {
+            Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
+        }
+
+        public void Update(string name)
         {
             Name = Guard.Against.NullOrWhiteSpace(name, nameof(name));
         }

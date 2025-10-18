@@ -11,7 +11,6 @@ namespace CorrespondenceTracker.Domain.Entities
         // Protected constructor for ORM
         protected User()
         {
-            FullName = string.Empty;
         }
 
         // Public constructor

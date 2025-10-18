@@ -21,7 +21,7 @@ namespace CorrespondenceTracker.Application.Classifications.Commands.UpdateClass
             var classification = await _context.Classifications.FindAsync(id)
                 ?? throw new ArgumentException($"Classification with ID {id} not found");
 
-            classification = new Domain.Entities.Classification(request.Name);
+            classification.Update(request.Name);
 
             await _context.SaveChangesAsync();
         }

@@ -2,6 +2,6 @@ namespace CorrespondenceTracker.Application.Classifications.Commands.UpdateClass
 {
     public class UpdateClassificationRequest
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

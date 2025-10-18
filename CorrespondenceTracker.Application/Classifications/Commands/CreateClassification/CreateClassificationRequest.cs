@@ -2,6 +2,6 @@ namespace CorrespondenceTracker.Application.Classifications.Commands.CreateClass
 {
     public class CreateClassificationRequest
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

@@ -27,14 +27,23 @@ namespace CorrespondenceTracker.Api.Controllers
             _deleteSubjectCommand = deleteSubjectCommand;
         }
 
-        [HttpPost] // Search
-        public async Task<IActionResult> Index([FromBody] GetSubjectsFilterModel request)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var result = await _getSubjectsQuery.Execute(request);
+            var result = await _getSubjectsQuery.Execute();
             return Ok(result);
         }
 
-        [HttpPost("Create")]
+        /*[HttpGet("{id}")]
+        public async Task<IActionResult> GetSubject(Guid id)
+        {
+            var result = await _getSubjectsQuery.GetById(id);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }*/
+
+        [HttpPost]
         public async Task<IActionResult> CreateSubject([FromBody] CreateSubjectRequest request)
         {
             var result = await _createSubjectCommand.Execute(request);
