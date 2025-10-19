@@ -1,5 +1,4 @@
-﻿// CorrespondenceController.cs
-using CorrespondenceTracker.Application.Correspondences.Commands.CreateCorrespondence;
+﻿using CorrespondenceTracker.Application.Correspondences.Commands.CreateCorrespondence;
 using CorrespondenceTracker.Application.Correspondences.Commands.DeleteCorrespondence; // New
 using CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorrespondence; // New
 using CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespondences;
@@ -38,7 +37,7 @@ namespace CorrespondenceTracker.Api.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateCorrespondence([FromBody] CreateCorrespondenceRequest request)
+        public async Task<IActionResult> CreateCorrespondence([FromForm] CreateCorrespondenceRequest request)
         {
             var result = await _createCorrespondenceCommand.Execute(request);
             return Ok(result);

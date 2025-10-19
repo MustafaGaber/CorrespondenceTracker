@@ -43,15 +43,20 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                     .ToListAsync();
             }
 
+            Guid? fileId = null;
             if (model.File != null)
             {
-                FileData fileData = await _fileService.UploadDocument(
+                FileData fileData = await _fileService.UploadFile(
                    model.File, "Correspondence");
-                // 
-
-
-
-
+                FileRecord record = new FileRecord(
+                    fileName: "",
+                    fullPath: fileData.FullPath,
+                    contentType: model.File.ContentType,
+                    extension: fileData.Extension,
+                    size: fileData.Size
+                );
+                await _context.FileRecords.AddAsync(record);
+                fileId = record.Id;
             }
             var correspondence = new Correspondence(
                 direction: model.Direction ?? CorrespondenceDirection.Incoming,
@@ -66,7 +71,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 summary: model.Summary,
                 assignedUserId: model.AssignedUserId,
                 notes: model.Notes,
-                mainFileId: null,
+                mainFileId: fileId,
                 isClosed: model.IsClosed,
                 subjectId: model.SubjectId,
                 classifications: classifications
@@ -76,7 +81,6 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
             await _context.SaveChangesAsync();
             return correspondence.Id;
         }
-
     }
 
     public interface ICreateCorrespondenceCommand

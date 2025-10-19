@@ -91,7 +91,7 @@ namespace CorrespondenceTracker.Data
 
                 b.HasOne(x => x.MainFile)
                     .WithMany()
-                    .HasForeignKey(x => x.MainFileId)
+                    .HasForeignKey(x => x.FileId)
                     .OnDelete(DeleteBehavior.SetNull);
 
                 // Indexes for better performance
@@ -170,7 +170,7 @@ namespace CorrespondenceTracker.Data
             {
                 b.HasKey(x => x.Id);
                 b.Property(x => x.FileName).IsRequired().HasMaxLength(500);
-                b.Property(x => x.RelativePath).IsRequired().HasMaxLength(1000);
+                b.Property(x => x.FullPath).IsRequired().HasMaxLength(1000);
                 b.Property(x => x.ContentType).HasMaxLength(30);
                 b.Property(x => x.Extension).HasMaxLength(10);
                 b.Property(x => x.Size);

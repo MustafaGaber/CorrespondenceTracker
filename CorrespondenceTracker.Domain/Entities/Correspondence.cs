@@ -28,7 +28,7 @@ namespace CorrespondenceTracker.Domain.Entities
 
         public string? Notes { get; private set; }
         public bool IsClosed { get; private set; }
-        public Guid? MainFileId { get; private set; }
+        public Guid? FileId { get; private set; }
         public virtual FileRecord? MainFile { get; private set; }
 
         private readonly List<FollowUp> _followUps = new();
@@ -87,7 +87,7 @@ namespace CorrespondenceTracker.Domain.Entities
             Summary = summary;
             AssignedUserId = assignedUserId;
             Notes = notes;
-            MainFileId = mainFileId;
+            FileId = mainFileId;
             IsClosed = isClosed;
             SubjectId = subjectId;
 

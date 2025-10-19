@@ -79,6 +79,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
             return correspondences.Select(correspondence => new GetCorrespondenceResponse
             {
                 Id = correspondence.Id,
+                FileId = correspondence.FileId,
                 Direction = correspondence.Direction,
                 PriorityLevel = correspondence.PriorityLevel,
                 IncomingNumber = correspondence.IncomingNumber ?? string.Empty,

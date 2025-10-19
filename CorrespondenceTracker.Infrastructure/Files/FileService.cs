@@ -27,7 +27,7 @@ namespace CorrespondenceTracker.Infrastructure.Files
             EnsureDirectoryExists(_trashPath);
         }
 
-        public async Task<FileData> UploadDocument(IFormFile file, string destinationFolderPath)
+        public async Task<FileData> UploadFile(IFormFile file, string destinationFolderPath)
         {
             ValidateFile(file);
             ValidatePath(destinationFolderPath);
@@ -185,47 +185,6 @@ namespace CorrespondenceTracker.Infrastructure.Files
             }
         }
 
-        public void DeleteFolder(string path, bool recursive = false)
-        {
-            ValidatePath(path);
-
-            if (!Directory.Exists(path))
-            {
-                throw new DirectoryNotFoundException($"Directory not found: {path}");
-            }
-
-            try
-            {
-                Directory.Delete(path, recursive);
-                _logger.LogInformation("Folder deleted successfully: {FolderPath}, Recursive: {Recursive}", path, recursive);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to delete folder: {FolderPath}", path);
-                throw;
-            }
-        }
-
-        private string BuildFolderPath(int authorityId, int cityId, string serviceName,
-            string mainFolder, string? additionalPath = null)
-        {
-            var pathParts = new List<string>
-            {
-                _storagePath,
-                authorityId.ToString(),
-                cityId.ToString(),
-                SanitizePath(serviceName),
-                SanitizePath(mainFolder),
-            };
-
-            if (!string.IsNullOrEmpty(additionalPath))
-            {
-                pathParts.Add(SanitizePath(additionalPath));
-            }
-
-            return Path.Combine(pathParts.ToArray());
-        }
-
         private void ValidateFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -245,31 +204,18 @@ namespace CorrespondenceTracker.Infrastructure.Files
             }
         }
 
-        private void ValidateFolderName(string folderName)
-        {
-            if (string.IsNullOrWhiteSpace(folderName))
-            {
-                throw new ArgumentException("Folder name cannot be null or empty.");
-            }
-            var invalidChars = Path.GetInvalidFileNameChars();
-            if (folderName.IndexOfAny(invalidChars) >= 0)
-            {
-                throw new ArgumentException("Folder name contains invalid characters.");
-            }
-        }
-
         private void ValidatePath(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentNullException(nameof(path), "Path cannot be null or empty.");
             }
-            string normalizedPath = Path.GetFullPath(path);
+            /*string normalizedPath = Path.GetFullPath(path);
             string normalizedStoragePath = Path.GetFullPath(_storagePath);
             if (!normalizedPath.StartsWith(normalizedStoragePath, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UnauthorizedAccessException("Access to path outside storage directory is not allowed.");
-            }
+            }*/
         }
 
         private string SanitizePath(string path)
@@ -279,7 +225,6 @@ namespace CorrespondenceTracker.Infrastructure.Files
             var invalidChars = Path.GetInvalidFileNameChars();
             return string.Join("_", path.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
         }
-
 
         private string GenerateUniqueFileName(IFormFile file, string folder)
         {
@@ -295,9 +240,5 @@ namespace CorrespondenceTracker.Infrastructure.Files
             return fileName;
         }
 
-        private string GenerateUniqueFolderName()
-        {
-            return Path.GetRandomFileName().Replace('.', '_');
-        }
     }
 }

@@ -5,6 +5,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
     public class GetCorrespondenceResponse
     {
         public Guid Id { get; set; }
+        public Guid? FileId { get; set; }
         public CorrespondenceDirection Direction { get; set; }
         public PriorityLevel PriorityLevel { get; set; }
         public string IncomingNumber { get; set; } = string.Empty;
