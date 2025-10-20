@@ -20,6 +20,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 .Include(l => l.AssignedUser)
                 .Include(l => l.Classifications)
                 .Include(l => l.Subject)
+                .Include(l => l.File)
                 .AsQueryable();
 
             // Apply filters
@@ -80,6 +81,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
             {
                 Id = correspondence.Id,
                 FileId = correspondence.FileId,
+                FileExtension = correspondence.File?.Extension,
                 Direction = correspondence.Direction,
                 PriorityLevel = correspondence.PriorityLevel,
                 IncomingNumber = correspondence.IncomingNumber ?? string.Empty,

@@ -1,4 +1,4 @@
-﻿// Department.cs
+﻿
 using Ardalis.GuardClauses;
 
 namespace CorrespondenceTracker.Domain.Entities

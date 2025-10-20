@@ -89,7 +89,7 @@ namespace CorrespondenceTracker.Data
                     .HasForeignKey(x => x.AssignedUserId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                b.HasOne(x => x.MainFile)
+                b.HasOne(x => x.File)
                     .WithMany()
                     .HasForeignKey(x => x.FileId)
                     .OnDelete(DeleteBehavior.SetNull);

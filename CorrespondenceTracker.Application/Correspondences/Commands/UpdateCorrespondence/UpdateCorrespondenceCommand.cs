@@ -1,4 +1,5 @@
-﻿using CorrespondenceTracker.Data;
+﻿using CorrespondenceTracker.Application.Interfaces;
+using CorrespondenceTracker.Data;
 using CorrespondenceTracker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,12 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
     public class UpdateCorrespondenceCommand : IUpdateCorrespondenceCommand
     {
         private readonly CorrespondenceDatabaseContext _context;
+        private readonly IFileService _fileService;
 
-        public UpdateCorrespondenceCommand(CorrespondenceDatabaseContext context)
+        public UpdateCorrespondenceCommand(CorrespondenceDatabaseContext context, IFileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         public async Task Execute(Guid id, CreateCorrespondenceRequest model)
@@ -29,7 +32,6 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                     .Where(c => model.ClassificationIds.Contains(c.Id))
                     .ToListAsync();
 
-                // Validate that all classification IDs were found
                 if (classifications.Count != model.ClassificationIds.Count)
                 {
                     var foundIds = classifications.Select(c => c.Id).ToList();
@@ -37,7 +39,23 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                     throw new ArgumentException($"Classifications with IDs {string.Join(", ", missingIds)} not found");
                 }
             }
-            // Update scalar properties
+
+            Guid? fileId = null;
+            if (model.File != null)
+            {
+                FileData fileData = await _fileService.UploadFile(
+                   model.File, "Correspondence");
+                FileRecord record = new FileRecord(
+                    fileName: "",
+                    fullPath: fileData.FullPath,
+                    contentType: model.File.ContentType,
+                    extension: fileData.Extension,
+                    size: fileData.Size
+                );
+                await _context.FileRecords.AddAsync(record);
+                fileId = record.Id;
+            }
+
             correspondence.Update(
                 model.IncomingNumber,
                 model.IncomingDate,
@@ -48,6 +66,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 model.Summary,
                 model.AssignedUserId,
                 model.Notes,
+                fileId,
                 model.IsClosed,
                 model.SubjectId,
                 classifications

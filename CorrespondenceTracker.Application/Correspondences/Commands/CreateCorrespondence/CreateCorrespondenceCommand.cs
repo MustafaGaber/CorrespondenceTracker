@@ -71,7 +71,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 summary: model.Summary,
                 assignedUserId: model.AssignedUserId,
                 notes: model.Notes,
-                mainFileId: fileId,
+                fileId: fileId,
                 isClosed: model.IsClosed,
                 subjectId: model.SubjectId,
                 classifications: classifications

@@ -29,7 +29,7 @@ namespace CorrespondenceTracker.Domain.Entities
         public string? Notes { get; private set; }
         public bool IsClosed { get; private set; }
         public Guid? FileId { get; private set; }
-        public virtual FileRecord? MainFile { get; private set; }
+        public virtual FileRecord? File { get; private set; }
 
         private readonly List<FollowUp> _followUps = new();
         public virtual IReadOnlyList<FollowUp> FollowUps => _followUps.ToList();
@@ -50,9 +50,9 @@ namespace CorrespondenceTracker.Domain.Entities
         public Correspondence(
             CorrespondenceDirection direction,
             PriorityLevel priorityLevel,
-            string incomingNumber,
-            DateOnly incomingDate,
             Guid correspondentId,
+            string? incomingNumber = null,
+            DateOnly? incomingDate = null,
             string? outgoingNumber = null,
             DateOnly? outgoingDate = null,
             Guid? departmentId = null,
@@ -60,7 +60,7 @@ namespace CorrespondenceTracker.Domain.Entities
             string? summary = null,
             Guid? assignedUserId = null,
             string? notes = null,
-            Guid? mainFileId = null,
+            Guid? fileId = null,
             bool isClosed = false,
             Guid? subjectId = null,
             IEnumerable<Classification>? classifications = null)
@@ -87,7 +87,7 @@ namespace CorrespondenceTracker.Domain.Entities
             Summary = summary;
             AssignedUserId = assignedUserId;
             Notes = notes;
-            FileId = mainFileId;
+            FileId = fileId;
             IsClosed = isClosed;
             SubjectId = subjectId;
 
@@ -111,6 +111,7 @@ namespace CorrespondenceTracker.Domain.Entities
             string? summary,
             Guid? assignedUserId,
             string? notes,
+            Guid? fileId,
             bool isClosed,
             Guid? subjectId,
             IEnumerable<Classification>? classifications = null,
@@ -143,8 +144,8 @@ namespace CorrespondenceTracker.Domain.Entities
             Notes = notes;
             IsClosed = isClosed;
             SubjectId = subjectId;
+            if (fileId.HasValue) FileId = fileId;
 
-            // Reset and replace classifications
             _classifications.Clear();
             if (classifications != null)
             {
@@ -159,19 +160,17 @@ namespace CorrespondenceTracker.Domain.Entities
         private static void ApplyValidations(
             CorrespondenceDirection direction,
             PriorityLevel priorityLevel,
-            string incomingNumber,
-            DateOnly incomingDate,
+            string? incomingNumber,
+            DateOnly? incomingDate,
             string? outgoingNumber,
             DateOnly? outgoingDate,
             Guid correspondentId)
         {
-            Guard.Against.EnumOutOfRange(direction, nameof(direction));
-            Guard.Against.EnumOutOfRange(priorityLevel, nameof(priorityLevel));
-            Guard.Against.NullOrWhiteSpace(incomingNumber, nameof(incomingNumber));
-            Guard.Against.Null(incomingDate, nameof(incomingDate));
-            Guard.Against.Default(correspondentId, nameof(correspondentId));
+            Guard.Against.EnumOutOfRange(direction);
+            Guard.Against.EnumOutOfRange(priorityLevel);
+            Guard.Against.Default(correspondentId);
 
-            if (outgoingDate.HasValue && outgoingDate.Value < incomingDate)
+            if (incomingDate.HasValue && outgoingDate.HasValue && outgoingDate.Value < incomingDate)
             {
                 throw new ArgumentException("Outgoing date cannot be earlier than incoming date");
             }

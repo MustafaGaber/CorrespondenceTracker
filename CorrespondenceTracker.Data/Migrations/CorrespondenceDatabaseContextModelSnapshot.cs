@@ -34,7 +34,7 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasIndex("CorrespondencesId");
 
-                    b.ToTable("ClassificationCorrespondence");
+                    b.ToTable("ClassificationCorrespondence", (string)null);
                 });
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Attachment", b =>
