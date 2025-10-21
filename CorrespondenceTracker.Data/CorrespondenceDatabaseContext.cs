@@ -115,6 +115,11 @@ namespace CorrespondenceTracker.Data
                     .WithMany()
                     .HasForeignKey(x => x.FileRecordId)
                     .OnDelete(DeleteBehavior.SetNull);
+
+                b.HasOne(x => x.User)
+                   .WithMany()
+                   .HasForeignKey(x => x.UserId)
+                   .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Attachments configuration

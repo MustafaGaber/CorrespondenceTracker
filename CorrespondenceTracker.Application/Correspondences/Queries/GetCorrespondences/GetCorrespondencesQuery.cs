@@ -12,7 +12,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
             _context = context;
         }
 
-        public async Task<List<GetCorrespondenceResponse>> Execute(GetCorrespondencesFilterModel filter)
+        public async Task<List<GetCorrespondenceItemResponse>> Execute(GetCorrespondencesFilterModel filter)
         {
             var query = _context.Correspondences
                 .Include(l => l.Correspondent)
@@ -77,7 +77,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 .Take(filter.PageSize)
                 .ToListAsync();
 
-            return correspondences.Select(correspondence => new GetCorrespondenceResponse
+            return correspondences.Select(correspondence => new GetCorrespondenceItemResponse
             {
                 Id = correspondence.Id,
                 FileId = correspondence.FileId,
@@ -122,6 +122,6 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
 
     public interface IGetCorrespondencesQuery
     {
-        Task<List<GetCorrespondenceResponse>> Execute(GetCorrespondencesFilterModel filter);
+        Task<List<GetCorrespondenceItemResponse>> Execute(GetCorrespondencesFilterModel filter);
     }
 }

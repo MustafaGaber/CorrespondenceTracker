@@ -100,10 +100,9 @@ namespace CorrespondenceTracker.Domain.Entities
             }
         }
 
-        // ✅ New Update method with full validations
         public void Update(
             string incomingNumber,
-            DateOnly incomingDate,
+            DateOnly? incomingDate,
             string? outgoingNumber,
             DateOnly? outgoingDate,
             Guid? departmentId,
@@ -170,9 +169,9 @@ namespace CorrespondenceTracker.Domain.Entities
             Guard.Against.EnumOutOfRange(priorityLevel);
             Guard.Against.Default(correspondentId);
 
-            if (incomingDate.HasValue && outgoingDate.HasValue && outgoingDate.Value < incomingDate)
+            if (incomingDate.HasValue && outgoingDate.HasValue && outgoingDate.Value > incomingDate.Value)
             {
-                throw new ArgumentException("Outgoing date cannot be earlier than incoming date");
+                throw new ArgumentException("Incoming date cannot be earlier than outgoing date");
             }
         }
     }
