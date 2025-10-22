@@ -41,7 +41,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 ?? throw new ArgumentException($"Correspondent with ID {model.SenderId} not found");
 
             // 2. Save the file temporarily to get its path
-            FileData fileData = await _fileService.UploadFile(model.File, "CorrespondenceOcr");
+            FileData fileData = await _fileService.UploadFile(model.File);
 
             // 3. Use Gemini services
             string extractedText = await _ocrService.ExtractTextFromFileAsync(fileData.FullPath);

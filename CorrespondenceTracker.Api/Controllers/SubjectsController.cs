@@ -1,6 +1,7 @@
 using CorrespondenceTracker.Application.Subjects.Commands.CreateSubject;
 using CorrespondenceTracker.Application.Subjects.Commands.DeleteSubject;
 using CorrespondenceTracker.Application.Subjects.Commands.UpdateSubject;
+using CorrespondenceTracker.Application.Subjects.Queries.GetSubject;
 using CorrespondenceTracker.Application.Subjects.Queries.GetSubjects;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace CorrespondenceTracker.Api.Controllers
     public class SubjectsController : BaseController
     {
         private readonly IGetSubjectsQuery _getSubjectsQuery;
+        private readonly IGetSubjectQuery _getSubjectQuery;
         private readonly ICreateSubjectCommand _createSubjectCommand;
         private readonly IUpdateSubjectCommand _updateSubjectCommand;
         private readonly IDeleteSubjectCommand _deleteSubjectCommand;
@@ -19,12 +21,14 @@ namespace CorrespondenceTracker.Api.Controllers
             IGetSubjectsQuery getSubjectsQuery,
             ICreateSubjectCommand createSubjectCommand,
             IUpdateSubjectCommand updateSubjectCommand,
-            IDeleteSubjectCommand deleteSubjectCommand)
+            IDeleteSubjectCommand deleteSubjectCommand,
+            IGetSubjectQuery getSubjectQuery)
         {
             _getSubjectsQuery = getSubjectsQuery;
             _createSubjectCommand = createSubjectCommand;
             _updateSubjectCommand = updateSubjectCommand;
             _deleteSubjectCommand = deleteSubjectCommand;
+            _getSubjectQuery = getSubjectQuery;
         }
 
         [HttpGet]
@@ -43,6 +47,14 @@ namespace CorrespondenceTracker.Api.Controllers
             return Ok(result);
         }*/
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSubject(Guid id)
+        {
+            var result = await _getSubjectQuery.Execute(id);
+            if (result == null)
+                return NotFound(); // Return 404 if subject isn't found
+            return Ok(result); // Return 200 with the response
+        }
         [HttpPost]
         public async Task<IActionResult> CreateSubject([FromBody] CreateSubjectRequest request)
         {

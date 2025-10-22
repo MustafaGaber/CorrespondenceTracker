@@ -44,7 +44,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
             if (model.File != null)
             {
                 FileData fileData = await _fileService.UploadFile(
-                   model.File, "Correspondence");
+                   model.File);
                 FileRecord record = new FileRecord(
                     fileName: "",
                     fullPath: fileData.FullPath,
@@ -69,7 +69,9 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 fileId,
                 model.IsClosed,
                 model.SubjectId,
-                classifications
+                classifications,
+                model.Direction,
+                model.PriorityLevel
             );
 
             await _context.SaveChangesAsync();

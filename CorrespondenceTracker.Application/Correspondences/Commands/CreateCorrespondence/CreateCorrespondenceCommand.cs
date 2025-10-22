@@ -47,7 +47,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
             if (model.File != null)
             {
                 FileData fileData = await _fileService.UploadFile(
-                   model.File, "Correspondence");
+                   model.File);
                 FileRecord record = new FileRecord(
                     fileName: "",
                     fullPath: fileData.FullPath,

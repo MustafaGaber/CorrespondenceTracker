@@ -113,9 +113,9 @@ namespace CorrespondenceTracker.Domain.Entities
             Guid? fileId,
             bool isClosed,
             Guid? subjectId,
-            IEnumerable<Classification>? classifications = null,
-            CorrespondenceDirection? direction = null,
-            PriorityLevel? priorityLevel = null)
+            IEnumerable<Classification>? classifications,
+            CorrespondenceDirection? direction,
+            PriorityLevel? priorityLevel)
         {
             var newDirection = direction ?? Direction;
             var newPriority = priorityLevel ?? PriorityLevel;

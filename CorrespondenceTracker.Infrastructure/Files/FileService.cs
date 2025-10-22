@@ -27,13 +27,13 @@ namespace CorrespondenceTracker.Infrastructure.Files
             EnsureDirectoryExists(_trashPath);
         }
 
-        public async Task<FileData> UploadFile(IFormFile file, string destinationFolderPath)
+        public async Task<FileData> UploadFile(IFormFile file)
         {
             ValidateFile(file);
-            ValidatePath(destinationFolderPath);
-            EnsureDirectoryExists(destinationFolderPath);
-            string uniqueFileName = GenerateUniqueFileName(file, destinationFolderPath);
-            string filePath = Path.Combine(destinationFolderPath, uniqueFileName);
+            ValidatePath(_storagePath);
+            EnsureDirectoryExists(_storagePath);
+            string uniqueFileName = GenerateUniqueFileName(file, _storagePath);
+            string filePath = Path.Combine(_storagePath, uniqueFileName);
             try
             {
                 using var stream = new FileStream(filePath, FileMode.Create);
@@ -48,7 +48,7 @@ namespace CorrespondenceTracker.Infrastructure.Files
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to upload file {FileName} to {Path}", file.FileName, destinationFolderPath);
+                _logger.LogError(ex, "Failed to upload file {FileName} to {Path}", file.FileName, _storagePath);
                 if (File.Exists(filePath))
                 {
                     try { File.Delete(filePath); }

@@ -18,7 +18,7 @@ public class CreateCorrespondenceRequest
     public string? Notes { get; set; }
     public bool IsClosed { get; set; } = false;
     public CorrespondenceDirection? Direction { get; set; }
-
+    public PriorityLevel PriorityLevel { get; set; }
     // New
     public Guid? SubjectId { get; set; }
     public List<Guid>? ClassificationIds { get; set; }
