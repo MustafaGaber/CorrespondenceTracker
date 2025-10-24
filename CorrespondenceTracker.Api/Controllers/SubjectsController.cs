@@ -1,5 +1,6 @@
 using CorrespondenceTracker.Application.Subjects.Commands.CreateSubject;
 using CorrespondenceTracker.Application.Subjects.Commands.DeleteSubject;
+using CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCorrespondence; // New using
 using CorrespondenceTracker.Application.Subjects.Commands.UpdateSubject;
 using CorrespondenceTracker.Application.Subjects.Queries.GetSubject;
 using CorrespondenceTracker.Application.Subjects.Queries.GetSubjects;
@@ -16,20 +17,25 @@ namespace CorrespondenceTracker.Api.Controllers
         private readonly ICreateSubjectCommand _createSubjectCommand;
         private readonly IUpdateSubjectCommand _updateSubjectCommand;
         private readonly IDeleteSubjectCommand _deleteSubjectCommand;
+        private readonly IGenerateSubjectCorrespondenceCommand _generateSubjectCorrespondenceCommand; // New field
 
         public SubjectsController(
             IGetSubjectsQuery getSubjectsQuery,
             ICreateSubjectCommand createSubjectCommand,
             IUpdateSubjectCommand updateSubjectCommand,
             IDeleteSubjectCommand deleteSubjectCommand,
-            IGetSubjectQuery getSubjectQuery)
+            IGetSubjectQuery getSubjectQuery,
+            IGenerateSubjectCorrespondenceCommand generateSubjectCorrespondenceCommand) // New dependency
         {
             _getSubjectsQuery = getSubjectsQuery;
             _createSubjectCommand = createSubjectCommand;
             _updateSubjectCommand = updateSubjectCommand;
             _deleteSubjectCommand = deleteSubjectCommand;
             _getSubjectQuery = getSubjectQuery;
+            _generateSubjectCorrespondenceCommand = generateSubjectCorrespondenceCommand; // Initialize
         }
+
+        // ... existing Index, GetSubject, CreateSubject, UpdateSubject, DeleteSubject actions ...
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -37,15 +43,6 @@ namespace CorrespondenceTracker.Api.Controllers
             var result = await _getSubjectsQuery.Execute();
             return Ok(result);
         }
-
-        /*[HttpGet("{id}")]
-        public async Task<IActionResult> GetSubject(Guid id)
-        {
-            var result = await _getSubjectsQuery.GetById(id);
-            if (result == null)
-                return NotFound();
-            return Ok(result);
-        }*/
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubject(Guid id)
@@ -55,6 +52,7 @@ namespace CorrespondenceTracker.Api.Controllers
                 return NotFound(); // Return 404 if subject isn't found
             return Ok(result); // Return 200 with the response
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateSubject([FromBody] CreateSubjectRequest request)
         {
@@ -74,6 +72,15 @@ namespace CorrespondenceTracker.Api.Controllers
         {
             await _deleteSubjectCommand.Execute(id);
             return Ok();
+        }
+
+        // New Endpoint for Generating Correspondence
+        [HttpPost("{subjectId}/GenerateCorrespondence")]
+        public async Task<IActionResult> GenerateCorrespondence(Guid subjectId,
+            [FromBody] GenerateSubjectCorrespondenceRequest request)
+        {
+            var result = await _generateSubjectCorrespondenceCommand.Execute(subjectId, request);
+            return Ok(result);
         }
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 public class CreateCorrespondenceRequest
 {
     public IFormFile? File { get; init; }
-    public string IncomingNumber { get; set; } = null!;
+    public string? IncomingNumber { get; set; }
     public DateOnly? IncomingDate { get; set; }
     public Guid SenderId { get; set; }
 

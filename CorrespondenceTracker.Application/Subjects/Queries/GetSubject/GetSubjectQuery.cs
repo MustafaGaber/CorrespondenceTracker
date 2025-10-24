@@ -26,7 +26,8 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubject
                     Name = s.Name,
                     Correspondences = _context.Correspondences
                         .Where(c => c.SubjectId == s.Id)
-                        .Include(c => c.FollowUps) // Include FollowUps for each Correspondence
+                        .Include(c => c.FollowUps)
+                        .Include(c => c.Correspondent)
                         .Select(c => new SubjectCorrespondenceDto
                         {
                             Id = c.Id,
@@ -46,7 +47,12 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubject
                                 Id = f.Id,
                                 Date = f.Date,
                                 Details = f.Details
-                            }).ToList()
+                            }).ToList(),
+                            Correspondent = c.Correspondent == null ? null : new CorrespondentDto
+                            {
+                                Id = c.CorrespondentId,
+                                Name = c.Correspondent.Name
+                            }
                         }).ToList()
                 })
                 .FirstOrDefaultAsync();

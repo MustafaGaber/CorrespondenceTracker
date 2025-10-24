@@ -25,6 +25,7 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubject
         public bool IsClosed { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<SubjectFollowUpDto> FollowUps { get; set; } = new();
+        public CorrespondentDto? Correspondent { get; set; }
     }
 
     public class SubjectFollowUpDto
@@ -32,5 +33,12 @@ namespace CorrespondenceTracker.Application.Subjects.Queries.GetSubject
         public Guid Id { get; set; }
         public DateOnly Date { get; set; }
         public string Details { get; set; } = string.Empty;
+
+    }
+
+    public class CorrespondentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
     }
 }
