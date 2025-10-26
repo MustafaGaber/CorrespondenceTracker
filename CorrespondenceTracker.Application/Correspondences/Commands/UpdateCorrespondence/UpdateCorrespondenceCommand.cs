@@ -56,6 +56,21 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 fileId = record.Id;
             }
 
+            List<Reminder>? reminders = null;
+            if (model.Reminders?.Any() == true)
+            {
+                reminders = new List<Reminder>();
+                foreach (var reminderDto in model.Reminders)
+                {
+                    var reminder = new Reminder(
+                        correspondenceId: id,
+                        remindTime: reminderDto.RemindTime,
+                        sendEmailMessage: reminderDto.SendEmailMessage,
+                        message: reminderDto.Message
+                    );
+                    reminders.Add(reminder);
+                }
+            }
             correspondence.Update(
                 model.IncomingNumber,
                 model.IncomingDate,
@@ -71,7 +86,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 model.SubjectId,
                 classifications,
                 model.Direction,
-                model.PriorityLevel
+                model.PriorityLevel,
+                reminders
             );
 
             await _context.SaveChangesAsync();

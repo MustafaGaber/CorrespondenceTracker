@@ -115,7 +115,8 @@ namespace CorrespondenceTracker.Domain.Entities
             Guid? subjectId,
             IEnumerable<Classification>? classifications,
             CorrespondenceDirection? direction,
-            PriorityLevel? priorityLevel)
+            PriorityLevel? priorityLevel,
+            IEnumerable<Reminder>? reminders)
         {
             var newDirection = direction ?? Direction;
             var newPriority = priorityLevel ?? PriorityLevel;
@@ -151,6 +152,15 @@ namespace CorrespondenceTracker.Domain.Entities
                 foreach (var c in classifications)
                 {
                     _classifications.Add(c);
+                }
+            }
+
+            _reminders.Clear();
+            if (reminders != null)
+            {
+                foreach (var r in reminders)
+                {
+                    _reminders.Add(r);
                 }
             }
         }

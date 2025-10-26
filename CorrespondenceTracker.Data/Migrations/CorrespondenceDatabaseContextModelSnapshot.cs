@@ -385,6 +385,10 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)

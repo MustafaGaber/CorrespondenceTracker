@@ -1,6 +1,6 @@
-﻿namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCorrespondence
+﻿namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateCorrespondenceReply
 {
-    public class GenerateSubjectCorrespondenceResponse
+    public class GenerateCorrespondenceReplyResponse
     {
         // public Guid CorrespondenceId { get; set; }
         public string GeneratedContent { get; set; } = string.Empty;

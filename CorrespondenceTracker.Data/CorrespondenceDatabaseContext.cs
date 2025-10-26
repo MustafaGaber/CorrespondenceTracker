@@ -158,6 +158,7 @@ namespace CorrespondenceTracker.Data
             {
                 b.HasKey(x => x.Id);
                 b.Property(x => x.FullName).IsRequired().HasMaxLength(100);
+                b.Property(x => x.Email).HasMaxLength(50);
                 b.Property(x => x.JobTitle).HasMaxLength(200);
                 b.HasIndex(x => x.FullName);
             });

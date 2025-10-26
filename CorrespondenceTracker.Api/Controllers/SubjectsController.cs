@@ -74,7 +74,6 @@ namespace CorrespondenceTracker.Api.Controllers
             return Ok();
         }
 
-        // New Endpoint for Generating Correspondence
         [HttpPost("{subjectId}/GenerateCorrespondence")]
         public async Task<IActionResult> GenerateCorrespondence(Guid subjectId,
             [FromBody] GenerateSubjectCorrespondenceRequest request)

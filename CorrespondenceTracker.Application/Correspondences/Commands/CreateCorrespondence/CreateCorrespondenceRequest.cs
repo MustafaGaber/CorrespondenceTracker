@@ -19,7 +19,15 @@ public class CreateCorrespondenceRequest
     public bool IsClosed { get; set; } = false;
     public CorrespondenceDirection? Direction { get; set; }
     public PriorityLevel PriorityLevel { get; set; }
-    // New
     public Guid? SubjectId { get; set; }
     public List<Guid>? ClassificationIds { get; set; }
+    public List<ReminderDto>? Reminders { get; set; }  // NEW PROPERTY
+}
+
+// NEW DTO CLASS
+public class ReminderDto
+{
+    public DateTime RemindTime { get; set; }
+    public string? Message { get; set; }
+    public bool SendEmailMessage { get; set; }
 }

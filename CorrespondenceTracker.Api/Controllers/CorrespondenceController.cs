@@ -4,6 +4,7 @@ using CorrespondenceTracker.Application.Correspondences.Commands.DeleteCorrespon
 using CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorrespondence;
 using CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespondence;
 using CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespondences;
+using CorrespondenceTracker.Application.Subjects.Commands.GenerateCorrespondenceReply;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CorrespondenceTracker.Api.Controllers
@@ -18,7 +19,7 @@ namespace CorrespondenceTracker.Api.Controllers
         private readonly IUpdateCorrespondenceCommand _updateCorrespondenceCommand;
         private readonly IDeleteCorrespondenceCommand _deleteCorrespondenceCommand;
         private readonly ICreateCorrespondenceFromImageCommand _createFromImageCommand; // New
-
+        private readonly IGenerateCorrespondenceReplyCommand _generateCorrespondenceReplyCommand;
         public CorrespondenceController(
             IGetCorrespondencesQuery getCorrespondencesQuery,
             ICreateCorrespondenceCommand createCorrespondenceCommand,
@@ -26,7 +27,8 @@ namespace CorrespondenceTracker.Api.Controllers
             IDeleteCorrespondenceCommand deleteCorrespondenceCommand,
             ICreateCorrespondenceFromImageCommand createFromImageCommand // New
 ,
-            IGetCorrespondenceQuery getCorrespondenceQuery)
+            IGetCorrespondenceQuery getCorrespondenceQuery,
+            IGenerateCorrespondenceReplyCommand generateCorrespondenceReplyCommand)
         {
             _getCorrespondencesQuery = getCorrespondencesQuery;
             _createCorrespondenceCommand = createCorrespondenceCommand;
@@ -34,6 +36,7 @@ namespace CorrespondenceTracker.Api.Controllers
             _deleteCorrespondenceCommand = deleteCorrespondenceCommand;
             _createFromImageCommand = createFromImageCommand; // New
             _getCorrespondenceQuery = getCorrespondenceQuery;
+            _generateCorrespondenceReplyCommand = generateCorrespondenceReplyCommand;
         }
 
         [HttpGet("{id}")]
@@ -76,6 +79,14 @@ namespace CorrespondenceTracker.Api.Controllers
         {
             await _deleteCorrespondenceCommand.Execute(id);
             return Ok();
+        }
+
+        [HttpPost("{correspondenceId}/GenerateReply")]
+        public async Task<IActionResult> GenerateCorrespondence(Guid correspondenceId,
+           [FromBody] GenerateCorrespondenceReplyRequest request)
+        {
+            var result = await _generateCorrespondenceReplyCommand.Execute(correspondenceId, request);
+            return Ok(result);
         }
     }
 }

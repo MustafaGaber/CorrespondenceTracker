@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CorrespondenceTracker.Data.Migrations
 {
     [DbContext(typeof(CorrespondenceDatabaseContext))]
-    [Migration("20251019072153_Rename")]
-    partial class Rename
+    [Migration("20251026090352_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -301,11 +301,16 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CorrespondenceId");
 
                     b.HasIndex("FileRecordId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FollowUps", (string)null);
                 });
@@ -383,6 +388,10 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -454,7 +463,7 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("CorrespondenceTracker.Domain.Entities.FileRecord", "MainFile")
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.FileRecord", "File")
                         .WithMany()
                         .HasForeignKey("FileId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -470,7 +479,7 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.Navigation("Department");
 
-                    b.Navigation("MainFile");
+                    b.Navigation("File");
 
                     b.Navigation("Subject");
                 });
@@ -488,9 +497,16 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasForeignKey("FileRecordId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Correspondence");
 
                     b.Navigation("FileRecord");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Reminder", b =>

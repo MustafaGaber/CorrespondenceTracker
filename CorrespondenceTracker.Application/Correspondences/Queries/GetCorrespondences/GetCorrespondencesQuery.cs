@@ -56,7 +56,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
 
             if (filter.IsClosed.HasValue)
             {
-                query = query.Where(l => l.IsClosed == filter.IsClosed.Value);
+                //query = query.Where(l => l.IsClosed == filter.IsClosed.Value);
             }
 
             if (filter.FromDate.HasValue)

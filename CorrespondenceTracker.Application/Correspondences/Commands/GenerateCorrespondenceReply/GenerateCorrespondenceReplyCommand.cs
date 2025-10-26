@@ -2,23 +2,23 @@
 using CorrespondenceTracker.Application.Interfaces;
 using CorrespondenceTracker.Application.Subjects.Queries.GetSubject;
 using CorrespondenceTracker.Data;
+using CorrespondenceTracker.Domain.Entities;
 using System.Text;
 
-namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCorrespondence
+namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateCorrespondenceReply
 {
-    public interface IGenerateSubjectCorrespondenceCommand
+    public interface IGenerateCorrespondenceReplyCommand
     {
-        Task<GenerateSubjectCorrespondenceResponse> Execute(Guid subjectId, GenerateSubjectCorrespondenceRequest model);
+        Task<GenerateCorrespondenceReplyResponse> Execute(Guid originalCorrespondenceId, GenerateCorrespondenceReplyRequest model);
     }
-
-    public class GenerateSubjectCorrespondenceCommand : IGenerateSubjectCorrespondenceCommand
+    public class GenerateCorrespondenceReplyCommand : IGenerateCorrespondenceReplyCommand
     {
         private readonly CorrespondenceDatabaseContext _context;
         private readonly IGetSubjectQuery _getSubjectQuery;
         private readonly IGeminiCorrespondenceGeneratorService _generatorService;
-        private readonly IGeminiSummarizerService _summarizerService;
+        private readonly IGeminiSummarizerService _summarizerService; // Kept for consistency
 
-        public GenerateSubjectCorrespondenceCommand(
+        public GenerateCorrespondenceReplyCommand(
             CorrespondenceDatabaseContext context,
             IGetSubjectQuery getSubjectQuery,
             IGeminiCorrespondenceGeneratorService generatorService,
@@ -30,37 +30,51 @@ namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCor
             _summarizerService = summarizerService;
         }
 
-        public async Task<GenerateSubjectCorrespondenceResponse> Execute(Guid subjectId, GenerateSubjectCorrespondenceRequest model)
+        public async Task<GenerateCorrespondenceReplyResponse> Execute(Guid originalCorrespondenceId, GenerateCorrespondenceReplyRequest model)
         {
-            Guard.Against.Default(subjectId);
+            Guard.Against.Default(originalCorrespondenceId);
             Guard.Against.NullOrWhiteSpace(model.Prompt, nameof(model.Prompt));
-            Guard.Against.Default(model.RecipientId, nameof(model.RecipientId));
 
-            // 1. Fetch Subject History using the existing query
+            // 1. Fetch the original correspondence
+            var originalCorrespondence = await _context.Correspondences.FindAsync(originalCorrespondenceId);
+            Guard.Against.NotFound(originalCorrespondenceId, originalCorrespondence, $"Original correspondence with ID {originalCorrespondenceId} not found.");
+
+            // 2. Validate the original correspondence
+            if (originalCorrespondence.Direction != CorrespondenceDirection.Incoming)
+            {
+                throw new InvalidOperationException("Cannot generate a reply for an outgoing correspondence.");
+            }
+            Guard.Against.Default(originalCorrespondence.SubjectId, nameof(originalCorrespondence.SubjectId), "The original correspondence is not linked to a subject.");
+            Guard.Against.Default(originalCorrespondence.CorrespondentId, nameof(originalCorrespondence.CorrespondentId), "The original correspondence does not have a valid correspondent.");
+
+            // 3. Extract key IDs for the new reply
+            var subjectId = originalCorrespondence.SubjectId.Value;
+            var recipientId = originalCorrespondence.CorrespondentId; // The sender of the original is the recipient of the reply
+
+            // 4. Fetch Subject History using the existing query
             var subjectResponse = await _getSubjectQuery.Execute(subjectId);
             Guard.Against.NotFound(subjectId, subjectResponse, $"Subject with ID {subjectId} not found.");
 
-            // Check if recipient exists
-            var correspondent = await _context.Correspondents.FindAsync(model.RecipientId)
-                ?? throw new ArgumentException($"Correspondent with ID {model.RecipientId} not found");
+            // Check if recipient (the original sender) exists
+            var recipient = await _context.Correspondents.FindAsync(recipientId)
+                ?? throw new ArgumentException($"Correspondent (recipient) with ID {recipientId} not found");
 
-            // 2. Format the subject history for the Gemini API
+            // 5. Format the subject history for the Gemini API
             string subjectHistory = FormatSubjectHistory(subjectResponse);
 
-            // 3. Call Gemini to generate the correspondence content
+            // 6. Call Gemini to generate the correspondence content
             string generatedContent = await _generatorService.GenerateResponseAsync(
                 subjectHistory,
                 model.Prompt);
 
-            // 4. Summarize the generated content
+            // 7. Summarize and Save (Kept commented out, matching your existing command)
             /* string generatedSummary = await _summarizerService.SummarizeTextAsync(generatedContent);
 
-             // 5. Create and save the new outgoing correspondence entity
              var newCorrespondence = new Correspondence(
                  direction: CorrespondenceDirection.Outgoing,
                  priorityLevel: PriorityLevel.Medium, // Defaulting to Medium
                  subjectId: subjectId,
-                 correspondentId: model.RecipientId,
+                 correspondentId: recipientId, // This is the ID of the original sender
                  content: generatedContent,
                  summary: generatedSummary
              );
@@ -68,8 +82,8 @@ namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCor
              _context.Correspondences.Add(newCorrespondence);
              await _context.SaveChangesAsync();*/
 
-            // 6. Return the response
-            return new GenerateSubjectCorrespondenceResponse
+            // 8. Return the response
+            return new GenerateCorrespondenceReplyResponse
             {
                 //Id = newCorrespondence.Id,
                 GeneratedContent = generatedContent,
@@ -77,6 +91,8 @@ namespace CorrespondenceTracker.Application.Subjects.Commands.GenerateSubjectCor
             };
         }
 
+        // This private method is duplicated from GenerateSubjectCorrespondenceCommand
+        // In a real app, this might be moved to a shared service or helper class.
         private string FormatSubjectHistory(GetSubjectResponse subjectResponse)
         {
             var sb = new StringBuilder();

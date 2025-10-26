@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -59,7 +60,7 @@ namespace CorrespondenceTracker.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FileName = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    RelativePath = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    FullPath = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Extension = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Size = table.Column<long>(type: "bigint", nullable: false),
@@ -91,6 +92,7 @@ namespace CorrespondenceTracker.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     JobTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -119,7 +121,7 @@ namespace CorrespondenceTracker.Data.Migrations
                     SubjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsClosed = table.Column<bool>(type: "bit", nullable: false),
-                    MainFileId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FileId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -139,8 +141,8 @@ namespace CorrespondenceTracker.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_Correspondences_FileRecords_MainFileId",
-                        column: x => x.MainFileId,
+                        name: "FK_Correspondences_FileRecords_FileId",
+                        column: x => x.FileId,
                         principalTable: "FileRecords",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
@@ -218,9 +220,10 @@ namespace CorrespondenceTracker.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CorrespondenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileRecordId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Date = table.Column<DateOnly>(type: "date", nullable: false),
                     Details = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
-                    FileRecordId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -237,6 +240,12 @@ namespace CorrespondenceTracker.Data.Migrations
                         name: "FK_FollowUps_FileRecords_FileRecordId",
                         column: x => x.FileRecordId,
                         principalTable: "FileRecords",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_FollowUps_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                 });
@@ -303,6 +312,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 column: "Direction");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Correspondences_FileId",
+                table: "Correspondences",
+                column: "FileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_IncomingDate",
                 table: "Correspondences",
                 column: "IncomingDate");
@@ -311,11 +325,6 @@ namespace CorrespondenceTracker.Data.Migrations
                 name: "IX_Correspondences_IncomingNumber",
                 table: "Correspondences",
                 column: "IncomingNumber");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Correspondences_MainFileId",
-                table: "Correspondences",
-                column: "MainFileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_OutgoingDate",
@@ -352,6 +361,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 name: "IX_FollowUps_FileRecordId",
                 table: "FollowUps",
                 column: "FileRecordId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FollowUps_UserId",
+                table: "FollowUps",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reminders_CorrespondenceId",
