@@ -20,6 +20,7 @@ namespace CorrespondenceTracker.Application.Users.Queries.GetUsers
                 {
                     Id = u.Id,
                     FullName = u.FullName,
+                    Email = u.Email,
                     JobTitle = u.JobTitle
                 })
                 .ToListAsync();
@@ -33,8 +34,9 @@ namespace CorrespondenceTracker.Application.Users.Queries.GetUsers
 
     public class UserListDto
     {
-        public Guid Id { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string? JobTitle { get; set; }
+        public required Guid Id { get; set; }
+        public required string FullName { get; set; }
+        public required string Email { get; set; }
+        public required string? JobTitle { get; set; }
     }
 }

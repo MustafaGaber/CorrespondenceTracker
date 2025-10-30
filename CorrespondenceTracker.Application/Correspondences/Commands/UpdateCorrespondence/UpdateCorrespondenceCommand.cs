@@ -16,10 +16,11 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
             _fileService = fileService;
         }
 
-        public async Task Execute(Guid id, CreateCorrespondenceRequest model)
+        public async Task Execute(Guid id, UpdateCorrespondenceRequest model)
         {
             var correspondence = await _context.Correspondences
                 .Include(c => c.Classifications)
+                .Include(c => c.Reminders)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (correspondence == null)
@@ -43,8 +44,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
             Guid? fileId = null;
             if (model.File != null)
             {
-                FileData fileData = await _fileService.UploadFile(
-                   model.File);
+                FileData fileData = await _fileService.UploadFile(model.File);
                 FileRecord record = new FileRecord(
                     fileName: "",
                     fullPath: fileData.FullPath,
@@ -56,21 +56,9 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 fileId = record.Id;
             }
 
-            List<Reminder>? reminders = null;
-            if (model.Reminders?.Any() == true)
-            {
-                reminders = new List<Reminder>();
-                foreach (var reminderDto in model.Reminders)
-                {
-                    var reminder = new Reminder(
-                        correspondenceId: id,
-                        remindTime: reminderDto.RemindTime,
-                        sendEmailMessage: reminderDto.SendEmailMessage,
-                        message: reminderDto.Message
-                    );
-                    reminders.Add(reminder);
-                }
-            }
+            // Handle reminders intelligently
+            UpdateReminders(correspondence, model.Reminders);
+
             correspondence.Update(
                 model.IncomingNumber,
                 model.IncomingDate,
@@ -86,13 +74,68 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorre
                 model.SubjectId,
                 classifications,
                 model.Direction,
-                model.PriorityLevel,
-                reminders
+                model.PriorityLevel
             );
 
             await _context.SaveChangesAsync();
         }
+
+        private void UpdateReminders(Correspondence correspondence, List<ReminderDto>? reminderDtos)
+        {
+            var existingReminders = correspondence.Reminders.ToList();
+
+            if (reminderDtos == null || !reminderDtos.Any())
+            {
+                // No reminders in request - delete all existing
+                foreach (var existing in existingReminders)
+                {
+                    _context.Reminders.Remove(existing);
+                }
+                return;
+            }
+
+            // Track which existing reminder IDs are being updated
+            var processedReminderIds = new HashSet<Guid>();
+
+            // Process DTOs: update existing or add new
+            foreach (var reminderDto in reminderDtos)
+            {
+                if (reminderDto.Id.HasValue)
+                {
+                    // Update existing reminder
+                    var existing = existingReminders.FirstOrDefault(r => r.Id == reminderDto.Id.Value);
+
+                    if (existing == null)
+                        throw new ArgumentException($"Reminder with ID {reminderDto.Id.Value} not found");
+
+                    existing.Update(
+                        reminderDto.RemindTime,
+                        reminderDto.SendEmailMessage,
+                        reminderDto.Message
+                    );
+                    processedReminderIds.Add(existing.Id);
+                }
+                else
+                {
+                    // Add new reminder (Id is null)
+                    var newReminder = new Reminder(
+                        correspondenceId: correspondence.Id,
+                        remindTime: reminderDto.RemindTime,
+                        sendEmailMessage: reminderDto.SendEmailMessage,
+                        message: reminderDto.Message
+                    );
+                    _context.Reminders.Add(newReminder);
+                }
+            }
+
+            // Delete reminders that weren't in the request
+            foreach (var existing in existingReminders)
+            {
+                if (!processedReminderIds.Contains(existing.Id))
+                {
+                    _context.Reminders.Remove(existing);
+                }
+            }
+        }
     }
-
-
 }

@@ -74,6 +74,9 @@ namespace CorrespondenceTracker.Data
                 b.HasMany(x => x.Classifications)
                  .WithMany(c => c.Correspondences);
 
+                b.HasMany(x => x.Reminders)
+                .WithOne(r => r.Correspondence);
+
                 b.HasOne(x => x.Subject)
                   .WithMany()
                   .HasForeignKey(x => x.SubjectId)

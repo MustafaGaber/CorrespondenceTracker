@@ -24,8 +24,6 @@
     <Folder Include="Correspondents\Queries\" />
     <Folder Include="FollowUps\Commands\" />
     <Folder Include="FollowUps\Queries\" />
-    <Folder Include="Reminders\Commands\" />
-    <Folder Include="Reminders\Queries\" />
     <Folder Include="Users\Queries\GetUser\" />
     <Folder Include="Users\Queries\GetUsers\" />
   </ItemGroup>

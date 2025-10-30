@@ -12,6 +12,8 @@
         public bool IsCompleted { get; private set; }
         public bool IsDismissed { get; private set; }
         public DateTime? CompletedAt { get; private set; }
+        public bool IsEmailSent { get; private set; }
+        public DateTime? EmailSentAt { get; private set; }
 
         // Protected constructor for EF Core
         protected Reminder() { }
@@ -30,7 +32,20 @@
             Message = message;
             IsCompleted = false;
             IsDismissed = false;
+            IsEmailSent = false;
             CreatedAt = DateTime.Now;
+        }
+
+        // Update method for modifying reminder properties
+        public void Update(DateTime remindTime, bool sendEmailMessage, string? message = null)
+        {
+            Guard.Against.Default(remindTime, nameof(remindTime));
+            Guard.Against.OutOfRange(remindTime, nameof(remindTime), DateTime.Now.AddMinutes(-1), DateTime.MaxValue);
+
+            RemindTime = remindTime;
+            SendEmailMessage = sendEmailMessage;
+            Message = message;
+            UpdatedAt = DateTime.Now;
         }
 
         // Business methods
@@ -60,6 +75,7 @@
 
             RemindTime = newRemindTime;
             IsDismissed = false; // Reset dismissal when rescheduling
+            IsEmailSent = false; // Reset email sent status when rescheduling
             UpdatedAt = DateTime.Now;
         }
 
@@ -67,6 +83,16 @@
         {
             Message = message;
             UpdatedAt = DateTime.Now;
+        }
+
+        public void MarkEmailAsSent()
+        {
+            if (!IsEmailSent)
+            {
+                IsEmailSent = true;
+                EmailSentAt = DateTime.Now;
+                UpdatedAt = DateTime.Now;
+            }
         }
 
         // Helper property to check if reminder is active

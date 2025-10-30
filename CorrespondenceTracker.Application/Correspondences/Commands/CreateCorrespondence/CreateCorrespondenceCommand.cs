@@ -15,7 +15,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
             _fileService = fileService;
         }
 
-        public async Task<Guid> Execute(CreateCorrespondenceRequest model)
+        public async Task<Guid> Execute(UpdateCorrespondenceRequest model)
         {
             var correspondent = await _context.Correspondents.FindAsync(model.SenderId)
                 ?? throw new ArgumentException($"Correspondent with ID {model.SenderId} not found");
@@ -85,6 +85,6 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
 
     public interface ICreateCorrespondenceCommand
     {
-        Task<Guid> Execute(CreateCorrespondenceRequest model);
+        Task<Guid> Execute(UpdateCorrespondenceRequest model);
     }
 }

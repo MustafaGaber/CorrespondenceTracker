@@ -1,7 +1,7 @@
 ﻿using CorrespondenceTracker.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 
-public class CreateCorrespondenceRequest
+public class UpdateCorrespondenceRequest
 {
     public IFormFile? File { get; init; }
     public string? IncomingNumber { get; set; }
@@ -21,12 +21,12 @@ public class CreateCorrespondenceRequest
     public PriorityLevel PriorityLevel { get; set; }
     public Guid? SubjectId { get; set; }
     public List<Guid>? ClassificationIds { get; set; }
-    public List<ReminderDto>? Reminders { get; set; }  // NEW PROPERTY
+    public List<ReminderDto>? Reminders { get; set; }
 }
 
-// NEW DTO CLASS
 public class ReminderDto
 {
+    public Guid? Id { get; set; }  // null = new reminder, has value = update existing
     public DateTime RemindTime { get; set; }
     public string? Message { get; set; }
     public bool SendEmailMessage { get; set; }

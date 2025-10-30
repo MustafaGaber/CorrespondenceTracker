@@ -15,15 +15,17 @@ namespace CorrespondenceTracker.Domain.Entities
         }
 
         // Public constructor
-        public User(string fullName, string? jobTitle = null)
+        public User(string fullName, string? email = null, string? jobTitle = null)
         {
             FullName = Guard.Against.NullOrWhiteSpace(fullName, nameof(fullName));
+            Email = email;
             JobTitle = jobTitle;
         }
 
-        public void Update(string fullName, string? jobTitle = null)
+        public void Update(string fullName, string? email = null, string? jobTitle = null)
         {
             FullName = Guard.Against.NullOrWhiteSpace(fullName, nameof(fullName));
+            Email = email;
             JobTitle = jobTitle;
         }
     }

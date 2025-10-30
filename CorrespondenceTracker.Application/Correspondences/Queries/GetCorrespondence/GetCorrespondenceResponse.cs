@@ -24,6 +24,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
         public List<ClassificationDto> Classifications { get; set; } = new();
         // New property for Follow-Ups
         public List<FollowUpDto> FollowUps { get; set; } = new();
+        // New property for Reminders
+        public List<ReminderDto> Reminders { get; set; } = new();
     }
 
     public class CorrespondentDto
@@ -64,5 +66,19 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
         public UserDto? User { get; set; }
         public DateOnly Date { get; set; }
         public string Details { get; set; } = string.Empty;
+    }
+
+    // New DTO for Reminders
+    public class ReminderDto
+    {
+        public Guid Id { get; set; }
+        public DateTime RemindTime { get; set; }
+        public string? Message { get; set; }
+        public bool SendEmailMessage { get; set; }
+        public bool IsCompleted { get; set; }
+        public bool IsDismissed { get; set; }
+        public DateTime? CompletedAt { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsOverdue { get; set; }
     }
 }

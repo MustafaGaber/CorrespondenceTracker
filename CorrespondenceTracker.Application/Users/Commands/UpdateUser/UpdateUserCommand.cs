@@ -1,7 +1,6 @@
 ﻿// User/Commands/UpdateUserCommand.cs
 using CorrespondenceTracker.Application.Users.Commands.CreateUser;
 using CorrespondenceTracker.Data;
-using CorrespondenceTracker.Domain.Entities;
 
 namespace CorrespondenceTracker.Application.Users.Commands.UpdateUser
 {
@@ -19,7 +18,7 @@ namespace CorrespondenceTracker.Application.Users.Commands.UpdateUser
             var user = await _context.Users.FindAsync(id)
                 ?? throw new ArgumentException($"User with ID {id} not found");
 
-            user.Update(model.FullName, model.JobTitle);
+            user.Update(model.FullName, model.Email, model.JobTitle);
             await _context.SaveChangesAsync();
         }
     }

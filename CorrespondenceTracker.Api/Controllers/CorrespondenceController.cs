@@ -53,7 +53,7 @@ namespace CorrespondenceTracker.Api.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateCorrespondence([FromForm] CreateCorrespondenceRequest request)
+        public async Task<IActionResult> CreateCorrespondence([FromForm] UpdateCorrespondenceRequest request)
         {
             var result = await _createCorrespondenceCommand.Execute(request);
             return Ok(result);
@@ -68,7 +68,7 @@ namespace CorrespondenceTracker.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCorrespondence(Guid id, [FromForm] CreateCorrespondenceRequest request)
+        public async Task<IActionResult> UpdateCorrespondence(Guid id, [FromForm] UpdateCorrespondenceRequest request)
         {
             await _updateCorrespondenceCommand.Execute(id, request);
             return Ok();

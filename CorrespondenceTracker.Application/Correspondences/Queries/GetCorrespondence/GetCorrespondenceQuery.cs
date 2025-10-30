@@ -24,6 +24,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 // Include FollowUps and the associated User for each follow-up
                 .Include(l => l.FollowUps)
                     .ThenInclude(f => f.User)
+                // Include Reminders
+                .Include(l => l.Reminders)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (correspondence == null)
@@ -81,6 +83,19 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                         Id = f.User.Id,
                         Name = f.User.FullName
                     } : null
+                }).ToList(),
+                // Map Reminders to DTOs
+                Reminders = correspondence.Reminders.Select(r => new ReminderDto
+                {
+                    Id = r.Id,
+                    RemindTime = r.RemindTime,
+                    Message = r.Message,
+                    SendEmailMessage = r.SendEmailMessage,
+                    IsCompleted = r.IsCompleted,
+                    IsDismissed = r.IsDismissed,
+                    CompletedAt = r.CompletedAt,
+                    IsActive = r.IsActive,
+                    IsOverdue = r.IsOverdue
                 }).ToList()
             };
         }

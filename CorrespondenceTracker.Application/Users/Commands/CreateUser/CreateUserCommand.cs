@@ -15,7 +15,7 @@ namespace CorrespondenceTracker.Application.Users.Commands.CreateUser
 
         public async Task<Guid> Execute(CreateUserRequest model)
         {
-            var user = new User(model.FullName, model.JobTitle);
+            var user = new User(model.FullName, model.Email, model.JobTitle);
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user.Id;
@@ -30,6 +30,7 @@ namespace CorrespondenceTracker.Application.Users.Commands.CreateUser
     public class CreateUserRequest
     {
         public string FullName { get; set; } = string.Empty;
+        public string? Email { get; set; }
         public string? JobTitle { get; set; }
     }
-} 
+}

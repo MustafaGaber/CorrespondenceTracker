@@ -1,4 +1,5 @@
 ﻿using CorrespondenceTracker.Data;
+using CorrespondenceTracker.Infrastructure.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,9 +9,9 @@ builder.Services.AddControllers();
 //builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 // 2. Automatically register interfaces and their matching implementations
 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
 
 builder.Services.Scan(scan =>
 {
@@ -28,6 +29,9 @@ builder.Services.AddDbContext<CorrespondenceDatabaseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CorrespondenceDatabase"))
            .LogTo(Console.WriteLine, LogLevel.Warning);
 });
+
+// Register Background Service for Reminder Emails
+builder.Services.AddHostedService<ReminderEmailBackgroundService>();
 
 var app = builder.Build();
 

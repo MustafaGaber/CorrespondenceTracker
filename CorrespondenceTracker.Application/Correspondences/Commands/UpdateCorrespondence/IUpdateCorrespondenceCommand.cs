@@ -2,6 +2,6 @@
 {
     public interface IUpdateCorrespondenceCommand
     {
-        Task Execute(Guid id, CreateCorrespondenceRequest model);
+        Task Execute(Guid id, UpdateCorrespondenceRequest model);
     }
 }

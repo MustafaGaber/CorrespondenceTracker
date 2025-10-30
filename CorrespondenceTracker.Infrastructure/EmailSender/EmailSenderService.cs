@@ -31,11 +31,12 @@ namespace CorrespondenceTracker.Infrastructure.EmailSender
             mail.To.Add(recipientEmail);
             mail.Subject = subject;
             mail.Body = body;
+            mail.IsBodyHtml = true; // Add this line to enable HTML rendering
 
             // Create the SmtpClient object for Gmail
             SmtpClient smtpServer = new SmtpClient(GMAIL_HOST);
             smtpServer.Port = GMAIL_PORT;
-            smtpServer.EnableSsl = true; // Enable SSL
+            smtpServer.EnableSsl = true;
             smtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtpServer.UseDefaultCredentials = false;
 
@@ -43,7 +44,6 @@ namespace CorrespondenceTracker.Infrastructure.EmailSender
             smtpServer.Credentials = new NetworkCredential(senderEmail, senderAppPassword);
 
             // Send the email
-            // This method will throw an SmtpException if sending fails
             smtpServer.Send(mail);
         }
     }
