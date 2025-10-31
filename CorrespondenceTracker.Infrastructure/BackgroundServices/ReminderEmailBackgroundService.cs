@@ -88,7 +88,7 @@ namespace CorrespondenceTracker.Infrastructure.BackgroundServices
             // Find reminders that need email notification
             var remindersToProcess = await dbContext.Reminders
                 .Include(r => r.Correspondence)
-                    .ThenInclude(c => c.AssignedUser)
+                    .ThenInclude(c => c.FollowUpUser)
                 .Where(r =>
                     r.SendEmailMessage &&
                     !r.IsEmailSent &&
@@ -129,7 +129,7 @@ namespace CorrespondenceTracker.Infrastructure.BackgroundServices
             CancellationToken cancellationToken)
         {
             var correspondence = reminder.Correspondence;
-            var assignedUser = correspondence?.AssignedUser;
+            var assignedUser = correspondence?.FollowUpUser;
 
             if (assignedUser == null || string.IsNullOrWhiteSpace(assignedUser.Email))
             {

@@ -17,11 +17,12 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
             var query = _context.Correspondences
                 .Include(l => l.Correspondent)
                 .Include(l => l.Department)
-                .Include(l => l.AssignedUser)
+                .Include(l => l.FollowUpUser)
+                .Include(l => l.ResponsibleUser)
                 .Include(l => l.Classifications)
                 .Include(l => l.Subject)
                 .Include(l => l.File)
-                .AsQueryable();
+                .AsSplitQuery();
 
             // Apply filters
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
@@ -51,7 +52,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
 
             if (filter.AssignedUserId.HasValue)
             {
-                query = query.Where(l => l.AssignedUserId == filter.AssignedUserId.Value);
+                query = query.Where(l => l.FollowUpUserId == filter.AssignedUserId.Value);
             }
 
             if (filter.IsClosed.HasValue)
@@ -99,10 +100,15 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                     Name = correspondence.Department.Name
                 } : null,
                 Summary = correspondence.Summary,
-                AssignedUser = correspondence.AssignedUser != null ? new UserDto
+                FollowUpUser = correspondence.FollowUpUser != null ? new UserDto
                 {
-                    Id = correspondence.AssignedUser.Id,
-                    Name = correspondence.AssignedUser.FullName
+                    Id = correspondence.FollowUpUser.Id,
+                    Name = correspondence.FollowUpUser.FullName
+                } : null,
+                ResponsibleUser = correspondence.ResponsibleUser != null ? new UserDto
+                {
+                    Id = correspondence.ResponsibleUser.Id,
+                    Name = correspondence.ResponsibleUser.FullName
                 } : null,
                 Subject = correspondence.Subject != null ? new SubjectDto
                 {

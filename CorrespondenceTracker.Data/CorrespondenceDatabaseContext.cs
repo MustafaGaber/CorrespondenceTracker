@@ -63,8 +63,12 @@ namespace CorrespondenceTracker.Data
             modelBuilder.Entity<Correspondence>(b =>
             {
                 b.HasKey(x => x.Id);
+                b.HasIndex(c => new { c.IsClosed, c.PriorityLevel, c.IncomingDate })
+                 .HasDatabaseName("IX_Correspondences_Open_Priority_Date");
+
                 b.Property(x => x.IncomingNumber).HasMaxLength(50);
                 b.Property(x => x.OutgoingNumber).HasMaxLength(50);
+                b.Property(x => x.FinalAction).HasMaxLength(1000);
 
                 b.HasOne(x => x.Correspondent)
                     .WithMany()
@@ -87,10 +91,15 @@ namespace CorrespondenceTracker.Data
                     .HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.SetNull);
 
-                b.HasOne(x => x.AssignedUser)
+                b.HasOne(x => x.FollowUpUser)
                     .WithMany()
-                    .HasForeignKey(x => x.AssignedUserId)
+                    .HasForeignKey(x => x.FollowUpUserId)
                     .OnDelete(DeleteBehavior.SetNull);
+
+                b.HasOne(x => x.ResponsibleUser)
+                  .WithMany()
+                  .HasForeignKey(x => x.ResponsibleUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
 
                 b.HasOne(x => x.File)
                     .WithMany()
@@ -152,6 +161,11 @@ namespace CorrespondenceTracker.Data
             modelBuilder.Entity<Reminder>(b =>
             {
                 b.HasKey(x => x.Id);
+
+                b.HasIndex(x => x.RemindTime);
+                b.HasIndex(r => new { r.IsCompleted, r.IsDismissed, r.RemindTime })
+                 .HasDatabaseName("IX_Reminders_Active_RemindTime");
+
                 b.Property(x => x.Message).HasMaxLength(500);
                 b.HasIndex(x => x.RemindTime);
             });

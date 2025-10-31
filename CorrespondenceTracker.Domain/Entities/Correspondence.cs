@@ -20,14 +20,19 @@ namespace CorrespondenceTracker.Domain.Entities
         public string? Content { get; private set; }
         public string? Summary { get; private set; }
 
-        public Guid? AssignedUserId { get; private set; }
-        public virtual User? AssignedUser { get; private set; }
+        public Guid? FollowUpUserId { get; private set; }
+        public virtual User? FollowUpUser { get; private set; }
+
+        public Guid? ResponsibleUserId { get; private set; }
+        public virtual User? ResponsibleUser { get; private set; }
 
         public Guid? SubjectId { get; private set; }
         public virtual Subject? Subject { get; private set; }
 
         public string? Notes { get; private set; }
         public bool IsClosed { get; private set; }
+        public string? FinalAction { get; private set; }
+
         public Guid? FileId { get; private set; }
         public virtual FileRecord? File { get; private set; }
 
@@ -58,7 +63,8 @@ namespace CorrespondenceTracker.Domain.Entities
             Guid? departmentId = null,
             string? content = null,
             string? summary = null,
-            Guid? assignedUserId = null,
+            Guid? followUpUserId = null,
+            Guid? responsibleUserId = null,
             string? notes = null,
             Guid? fileId = null,
             bool isClosed = false,
@@ -85,7 +91,8 @@ namespace CorrespondenceTracker.Domain.Entities
             DepartmentId = departmentId;
             Content = content;
             Summary = summary;
-            AssignedUserId = assignedUserId;
+            FollowUpUserId = followUpUserId;
+            ResponsibleUserId = responsibleUserId;
             Notes = notes;
             FileId = fileId;
             IsClosed = isClosed;
@@ -108,7 +115,8 @@ namespace CorrespondenceTracker.Domain.Entities
             Guid? departmentId,
             string? content,
             string? summary,
-            Guid? assignedUserId,
+            Guid? followUpUserId,
+            Guid? responsibleUserId,
             string? notes,
             Guid? fileId,
             bool isClosed,
@@ -127,7 +135,7 @@ namespace CorrespondenceTracker.Domain.Entities
                 incomingDate,
                 outgoingNumber,
                 outgoingDate,
-                CorrespondentId // CorrespondentId is immutable after creation
+                CorrespondentId
             );
 
             Direction = newDirection;
@@ -139,7 +147,8 @@ namespace CorrespondenceTracker.Domain.Entities
             DepartmentId = departmentId;
             Content = content;
             Summary = summary;
-            AssignedUserId = assignedUserId;
+            FollowUpUserId = followUpUserId;
+            ResponsibleUserId = responsibleUserId;
             Notes = notes;
             IsClosed = isClosed;
             SubjectId = subjectId;
@@ -155,7 +164,6 @@ namespace CorrespondenceTracker.Domain.Entities
             }
         }
 
-        // ✅ Private shared validation logic
         private static void ApplyValidations(
             CorrespondenceDirection direction,
             PriorityLevel priorityLevel,

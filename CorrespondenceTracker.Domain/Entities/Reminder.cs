@@ -15,7 +15,9 @@
         public bool IsEmailSent { get; private set; }
         public DateTime? EmailSentAt { get; private set; }
 
-        // Protected constructor for EF Core
+        private readonly List<User> _usersToRemind = new();
+        public virtual IReadOnlyList<User> UsersToRemind => _usersToRemind.ToList();
+
         protected Reminder() { }
 
         // Public constructor
@@ -39,8 +41,12 @@
         // Update method for modifying reminder properties
         public void Update(DateTime remindTime, bool sendEmailMessage, string? message = null)
         {
-            Guard.Against.Default(remindTime, nameof(remindTime));
-            Guard.Against.OutOfRange(remindTime, nameof(remindTime), DateTime.Now.AddMinutes(-1), DateTime.MaxValue);
+            Guard.Against.Default(remindTime);
+
+            if (RemindTime != remindTime)
+            {
+                Guard.Against.OutOfRange(remindTime, nameof(remindTime), DateTime.Now.AddMinutes(-1), DateTime.MaxValue);
+            }
 
             RemindTime = remindTime;
             SendEmailMessage = sendEmailMessage;

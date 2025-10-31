@@ -14,7 +14,8 @@ public class UpdateCorrespondenceRequest
     public Guid? DepartmentId { get; set; }
     public string? Content { get; set; }
     public string? Summary { get; set; }
-    public Guid? AssignedUserId { get; set; }
+    public Guid? FollowUpUserId { get; set; }
+    public Guid? ResponsibleUserId { get; set; }
     public string? Notes { get; set; }
     public bool IsClosed { get; set; } = false;
     public CorrespondenceDirection? Direction { get; set; }

@@ -17,7 +17,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
             var correspondence = await _context.Correspondences
                 .Include(l => l.Correspondent)
                 .Include(l => l.Department)
-                .Include(l => l.AssignedUser)
+                .Include(l => l.FollowUpUser)
+                .Include(l => l.ResponsibleUser)
                 .Include(l => l.Classifications)
                 .Include(l => l.Subject)
                 .Include(l => l.File)
@@ -54,10 +55,15 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
                 } : null,
                 Summary = correspondence.Summary,
                 Content = correspondence.Content,
-                AssignedUser = correspondence.AssignedUser != null ? new UserDto
+                FollowUpUser = correspondence.FollowUpUser != null ? new UserDto
                 {
-                    Id = correspondence.AssignedUser.Id,
-                    Name = correspondence.AssignedUser.FullName
+                    Id = correspondence.FollowUpUser.Id,
+                    Name = correspondence.FollowUpUser.FullName
+                } : null,
+                ResponsibleUser = correspondence.ResponsibleUser != null ? new UserDto
+                {
+                    Id = correspondence.ResponsibleUser.Id,
+                    Name = correspondence.ResponsibleUser.FullName
                 } : null,
                 Subject = correspondence.Subject != null ? new SubjectDto
                 {

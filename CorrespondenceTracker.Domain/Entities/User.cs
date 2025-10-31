@@ -8,6 +8,12 @@ namespace CorrespondenceTracker.Domain.Entities
         public string FullName { get; private set; }
         public string? Email { get; private set; }
         public string? JobTitle { get; private set; }
+        public bool IsFollowUpUser { get; private set; }
+        public bool IsFollowUpManager { get; private set; }
+
+        //private readonly List<User> _sser = new();
+        //public virtual IReadOnlyList<User> Users => _followUps.ToList();
+
 
         // Protected constructor for ORM
         protected User()

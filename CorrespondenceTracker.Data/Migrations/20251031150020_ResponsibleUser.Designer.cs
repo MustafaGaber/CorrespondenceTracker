@@ -4,6 +4,7 @@ using CorrespondenceTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CorrespondenceTracker.Data.Migrations
 {
     [DbContext(typeof(CorrespondenceDatabaseContext))]
-    partial class CorrespondenceDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20251031150020_ResponsibleUser")]
+    partial class ResponsibleUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -185,9 +188,6 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasIndex("ResponsibleUserId");
 
                     b.HasIndex("SubjectId");
-
-                    b.HasIndex("IsClosed", "PriorityLevel", "IncomingDate")
-                        .HasDatabaseName("IX_Correspondences_Open_Priority_Date");
 
                     b.ToTable("Correspondences", (string)null);
                 });
@@ -372,9 +372,6 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasIndex("CorrespondenceId");
 
                     b.HasIndex("RemindTime");
-
-                    b.HasIndex("IsCompleted", "IsDismissed", "RemindTime")
-                        .HasDatabaseName("IX_Reminders_Active_RemindTime");
 
                     b.ToTable("Reminders", (string)null);
                 });

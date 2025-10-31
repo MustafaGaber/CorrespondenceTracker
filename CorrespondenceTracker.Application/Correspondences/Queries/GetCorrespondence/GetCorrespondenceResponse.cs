@@ -18,7 +18,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespon
         public DepartmentDto? Department { get; set; }
         public string? Content { get; set; }
         public string? Summary { get; set; }
-        public UserDto? AssignedUser { get; set; }
+        public UserDto? ResponsibleUser { get; set; }
+        public UserDto? FollowUpUser { get; set; }
         public bool IsClosed { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<ClassificationDto> Classifications { get; set; } = new();

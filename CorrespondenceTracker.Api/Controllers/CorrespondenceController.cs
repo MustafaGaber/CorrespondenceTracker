@@ -4,6 +4,7 @@ using CorrespondenceTracker.Application.Correspondences.Commands.DeleteCorrespon
 using CorrespondenceTracker.Application.Correspondences.Commands.UpdateCorrespondence;
 using CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespondence;
 using CorrespondenceTracker.Application.Correspondences.Queries.GetCorrespondences;
+using CorrespondenceTracker.Application.Correspondences.Queries.GetDashboardData;
 using CorrespondenceTracker.Application.Subjects.Commands.GenerateCorrespondenceReply;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,7 @@ namespace CorrespondenceTracker.Api.Controllers
     [ApiController]
     public class CorrespondenceController : BaseController
     {
+        private readonly IGetDashboardDataQuery _getDashboardDataQuery;
         private readonly IGetCorrespondenceQuery _getCorrespondenceQuery;
         private readonly IGetCorrespondencesQuery _getCorrespondencesQuery;
         private readonly ICreateCorrespondenceCommand _createCorrespondenceCommand;
@@ -25,10 +27,10 @@ namespace CorrespondenceTracker.Api.Controllers
             ICreateCorrespondenceCommand createCorrespondenceCommand,
             IUpdateCorrespondenceCommand updateCorrespondenceCommand,
             IDeleteCorrespondenceCommand deleteCorrespondenceCommand,
-            ICreateCorrespondenceFromImageCommand createFromImageCommand // New
-,
+            ICreateCorrespondenceFromImageCommand createFromImageCommand,
             IGetCorrespondenceQuery getCorrespondenceQuery,
-            IGenerateCorrespondenceReplyCommand generateCorrespondenceReplyCommand)
+            IGenerateCorrespondenceReplyCommand generateCorrespondenceReplyCommand,
+            IGetDashboardDataQuery getDashboardDataQuery)
         {
             _getCorrespondencesQuery = getCorrespondencesQuery;
             _createCorrespondenceCommand = createCorrespondenceCommand;
@@ -37,6 +39,15 @@ namespace CorrespondenceTracker.Api.Controllers
             _createFromImageCommand = createFromImageCommand; // New
             _getCorrespondenceQuery = getCorrespondenceQuery;
             _generateCorrespondenceReplyCommand = generateCorrespondenceReplyCommand;
+            _getDashboardDataQuery = getDashboardDataQuery;
+        }
+
+        [HttpGet("DashboardSummary")]
+        [ProducesResponseType(typeof(GetDashboardDataResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDashboardSummary()
+        {
+            var result = await _getDashboardDataQuery.Execute();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

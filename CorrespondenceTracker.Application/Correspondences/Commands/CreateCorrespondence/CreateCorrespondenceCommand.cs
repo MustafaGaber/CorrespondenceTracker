@@ -24,9 +24,14 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 await _context.Departments.FindAsync(model.DepartmentId.Value) == null)
                 throw new ArgumentException($"Department with ID {model.DepartmentId} not found");
 
-            if (model.AssignedUserId.HasValue &&
-                await _context.Users.FindAsync(model.AssignedUserId.Value) == null)
-                throw new ArgumentException($"User with ID {model.AssignedUserId} not found");
+            if (model.FollowUpUserId.HasValue &&
+                await _context.Users.FindAsync(model.FollowUpUserId.Value) == null)
+                throw new ArgumentException($"User with ID {model.FollowUpUserId} not found");
+
+            if (model.ResponsibleUserId.HasValue &&
+               await _context.Users.FindAsync(model.ResponsibleUserId.Value) == null)
+                throw new ArgumentException($"User with ID {model.ResponsibleUserId} not found");
+
 
             Subject? subject = null;
             if (model.SubjectId.HasValue)
@@ -69,7 +74,8 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 departmentId: model.DepartmentId,
                 content: model.Content,
                 summary: model.Summary,
-                assignedUserId: model.AssignedUserId,
+                followUpUserId: model.FollowUpUserId,
+                responsibleUserId: model.ResponsibleUserId,
                 notes: model.Notes,
                 fileId: fileId,
                 isClosed: model.IsClosed,

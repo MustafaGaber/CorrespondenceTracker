@@ -18,7 +18,7 @@ namespace CorrespondenceTracker.Application.Correspondents.Commands.UpdateCorres
             var correspondent = await _context.Correspondents.FindAsync(id)
                 ?? throw new ArgumentException($"Correspondent with ID {id} not found");
 
-            correspondent.Update(model.Name, model.Address);
+            correspondent.Update(model.Name, model.Address, model.Type);
             await _context.SaveChangesAsync();
         }
     }

@@ -15,7 +15,7 @@ namespace CorrespondenceTracker.Application.Correspondents.Commands.CreateCorres
 
         public async Task<Guid> Execute(CreateCorrespondentRequest model)
         {
-            var correspondent = new Correspondent(model.Name, model.Address);
+            var correspondent = new Correspondent(model.Name, model.Address, model.Type);
             _context.Correspondents.Add(correspondent);
             await _context.SaveChangesAsync();
             return correspondent.Id;
