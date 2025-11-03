@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="jsreport.AspNetCore" Version="3.8.1" />
+    <PackageReference Include="jsreport.Binary" Version="4.4.0" />
+    <PackageReference Include="jsreport.Local" Version="3.8.2" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>
@@ -27,6 +30,7 @@
     <ProjectReference Include="..\CorrespondenceTracker.Data\CorrespondenceTracker.Data.csproj" />
     <ProjectReference Include="..\CorrespondenceTracker.Domain\CorrespondenceTracker.Domain.csproj" />
     <ProjectReference Include="..\CorrespondenceTracker.Infrastructure\CorrespondenceTracker.Infrastructure.csproj" />
+    <ProjectReference Include="..\CorrespondenceTracker.Shared\CorrespondenceTracker.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -32,6 +32,7 @@ namespace CorrespondenceTracker.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -87,19 +88,45 @@ namespace CorrespondenceTracker.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Attachments",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    JobTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    CorrespondenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Date = table.Column<DateOnly>(type: "date", nullable: true),
+                    FileRecordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attachments_FileRecords_FileRecordId",
+                        column: x => x.FileRecordId,
+                        principalTable: "FileRecords",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClassificationCorrespondence",
+                columns: table => new
+                {
+                    ClassificationsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CorrespondencesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassificationCorrespondence", x => new { x.ClassificationsId, x.CorrespondencesId });
+                    table.ForeignKey(
+                        name: "FK_ClassificationCorrespondence_Classifications_ClassificationsId",
+                        column: x => x.ClassificationsId,
+                        principalTable: "Classifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,10 +144,12 @@ namespace CorrespondenceTracker.Data.Migrations
                     DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Summary = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AssignedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FollowUpUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ResponsibleUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     SubjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsClosed = table.Column<bool>(type: "bit", nullable: false),
+                    FinalAction = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     FileId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -152,66 +181,58 @@ namespace CorrespondenceTracker.Data.Migrations
                         principalTable: "Subjects",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Correspondences_Users_AssignedUserId",
-                        column: x => x.AssignedUserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Attachments",
+                name: "Reminders",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CorrespondenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Date = table.Column<DateOnly>(type: "date", nullable: true),
-                    FileRecordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RemindTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    SendEmailMessage = table.Column<bool>(type: "bit", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDismissed = table.Column<bool>(type: "bit", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsEmailSent = table.Column<bool>(type: "bit", nullable: false),
+                    EmailSentAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.PrimaryKey("PK_Reminders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Attachments_Correspondences_CorrespondenceId",
+                        name: "FK_Reminders_Correspondences_CorrespondenceId",
                         column: x => x.CorrespondenceId,
                         principalTable: "Correspondences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Attachments_FileRecords_FileRecordId",
-                        column: x => x.FileRecordId,
-                        principalTable: "FileRecords",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClassificationCorrespondence",
+                name: "Users",
                 columns: table => new
                 {
-                    ClassificationsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CorrespondencesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    JobTitle = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    IsFollowUpUser = table.Column<bool>(type: "bit", nullable: false),
+                    IsFollowUpManager = table.Column<bool>(type: "bit", nullable: false),
+                    ReminderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClassificationCorrespondence", x => new { x.ClassificationsId, x.CorrespondencesId });
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ClassificationCorrespondence_Classifications_ClassificationsId",
-                        column: x => x.ClassificationsId,
-                        principalTable: "Classifications",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ClassificationCorrespondence_Correspondences_CorrespondencesId",
-                        column: x => x.CorrespondencesId,
-                        principalTable: "Correspondences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Users_Reminders_ReminderId",
+                        column: x => x.ReminderId,
+                        principalTable: "Reminders",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -250,32 +271,6 @@ namespace CorrespondenceTracker.Data.Migrations
                         onDelete: ReferentialAction.SetNull);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Reminders",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CorrespondenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RemindTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    SendEmailMessage = table.Column<bool>(type: "bit", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
-                    IsDismissed = table.Column<bool>(type: "bit", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reminders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Reminders_Correspondences_CorrespondenceId",
-                        column: x => x.CorrespondenceId,
-                        principalTable: "Correspondences",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_CorrespondenceId",
                 table: "Attachments",
@@ -290,11 +285,6 @@ namespace CorrespondenceTracker.Data.Migrations
                 name: "IX_ClassificationCorrespondence_CorrespondencesId",
                 table: "ClassificationCorrespondence",
                 column: "CorrespondencesId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Correspondences_AssignedUserId",
-                table: "Correspondences",
-                column: "AssignedUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_CorrespondentId",
@@ -317,6 +307,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 column: "FileId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Correspondences_FollowUpUserId",
+                table: "Correspondences",
+                column: "FollowUpUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_IncomingDate",
                 table: "Correspondences",
                 column: "IncomingDate");
@@ -327,6 +322,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 column: "IncomingNumber");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Correspondences_Open_Priority_Date",
+                table: "Correspondences",
+                columns: new[] { "IsClosed", "PriorityLevel", "IncomingDate" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_OutgoingDate",
                 table: "Correspondences",
                 column: "OutgoingDate");
@@ -335,6 +335,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 name: "IX_Correspondences_OutgoingNumber",
                 table: "Correspondences",
                 column: "OutgoingNumber");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Correspondences_ResponsibleUserId",
+                table: "Correspondences",
+                column: "ResponsibleUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Correspondences_SubjectId",
@@ -368,6 +373,11 @@ namespace CorrespondenceTracker.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reminders_Active_RemindTime",
+                table: "Reminders",
+                columns: new[] { "IsCompleted", "IsDismissed", "RemindTime" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reminders_CorrespondenceId",
                 table: "Reminders",
                 column: "CorrespondenceId");
@@ -381,11 +391,52 @@ namespace CorrespondenceTracker.Data.Migrations
                 name: "IX_Users_FullName",
                 table: "Users",
                 column: "FullName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ReminderId",
+                table: "Users",
+                column: "ReminderId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Attachments_Correspondences_CorrespondenceId",
+                table: "Attachments",
+                column: "CorrespondenceId",
+                principalTable: "Correspondences",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ClassificationCorrespondence_Correspondences_CorrespondencesId",
+                table: "ClassificationCorrespondence",
+                column: "CorrespondencesId",
+                principalTable: "Correspondences",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Correspondences_Users_FollowUpUserId",
+                table: "Correspondences",
+                column: "FollowUpUserId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Correspondences_Users_ResponsibleUserId",
+                table: "Correspondences",
+                column: "ResponsibleUserId",
+                principalTable: "Users",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Reminders_Correspondences_CorrespondenceId",
+                table: "Reminders");
+
             migrationBuilder.DropTable(
                 name: "Attachments");
 
@@ -394,9 +445,6 @@ namespace CorrespondenceTracker.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "FollowUps");
-
-            migrationBuilder.DropTable(
-                name: "Reminders");
 
             migrationBuilder.DropTable(
                 name: "Classifications");
@@ -418,6 +466,9 @@ namespace CorrespondenceTracker.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Reminders");
         }
     }
 }

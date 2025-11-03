@@ -1,0 +1,211 @@
+﻿@using CorrespondenceTracker.Application.Reports.Queries.GetCorrespondencesReportData
+@using CorrespondenceTracker.Domain.Entities
+@using CorrespondenceTracker.Shared.Extensions; 
+
+@model (List<CorrespondenceReportModel> Correspondences, GetCorrespondencesReportRequest Request)
+
+@{
+    string GetDefaultColumnName(string columnId)
+    {
+        return columnId switch
+        {
+            "direction" => "اتجاه الخطاب",
+            "priorityLevel" => "مستوى الأهمية",
+            "incomingNumber" => "رقم الوارد",
+            "incomingDate" => "تاريخ الوارد",
+            "outgoingNumber" => "رقم الصادر",
+            "outgoingDate" => "تاريخ الصادر",
+            "correspondentName" => "الجهة",
+            "departmentName" => "الإدارة",
+            "summary" => "الملخص",
+            "responsibleUserName" => "المسؤول",
+            "followUpUserName" => "المتابع",
+            "isClosed" => "الحالة",
+            "classifications" => "التصنيفات",
+            _ => columnId
+        };
+    }
+
+    string GetPriorityLevelName(PriorityLevel level)
+    {
+        return level switch
+        {
+            PriorityLevel.Critical => "حرجة",
+            PriorityLevel.UrgentAndImportant => "عاجل وهام",
+            PriorityLevel.Urgent => "عاجل",
+            PriorityLevel.Important => "هام",
+            PriorityLevel.Medium => "متوسط",
+            PriorityLevel.Low => "منخفض",
+            _ => level.ToString()
+        };
+    }
+
+    string GetDirectionName(CorrespondenceDirection direction)
+    {
+        return direction switch
+        {
+            CorrespondenceDirection.Incoming => "وارد",
+            CorrespondenceDirection.Outgoing => "صادر",
+            _ => direction.ToString()
+        };
+    }
+
+    var defaultOrder = new List<string> {
+        "direction", "priorityLevel", "incomingNumber", "incomingDate",
+        "outgoingNumber", "outgoingDate", "correspondentName", "departmentName",
+        "summary", "responsibleUserName", "followUpUserName", "isClosed", "classifications"
+    };
+
+    var columnOrder = Model.Request.ColumnOrder?.Any() == true
+        ? Model.Request.ColumnOrder
+        : defaultOrder;
+}
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+    <style>
+        /* Copied directly from ProjectsReport.cshtml */
+        .page-break-before {
+            page-break-before: always !important;
+        }
+        .p-0 {
+            padding: 0;
+        }
+        .subtext {
+            font-size: 9px;
+            color: #555;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #fff;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+        .nowrap {
+            white-space: nowrap;
+        }
+        .bg-grey {
+            background: #f5f5f5;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-start {
+            text-align: start;
+        }
+        .pb {
+            padding-bottom: 20px;
+        }
+        .py {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        .px {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table, th, td {
+            border: 0.2px solid #555;
+            font-size: 12px;
+        }
+        th {
+            padding: 2px 3px;
+            page-break-inside: avoid;
+            text-align: center;
+        }
+        td {
+            padding: 4px 5px;
+            page-break-inside: avoid;
+            text-align: center;
+        }
+        .fw-bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-center fw-bold py">@Model.Request.ReportTitle</div>
+    <table dir="rtl">
+        <thead>
+            <tr>
+                <th>م</th>
+                <th>@(Model.Request.ColumnNames?.GetValueOrDefault("subject") ?? "الموضوع")</th>
+
+                @foreach (var columnId in columnOrder)
+                {
+                    if ((Model.Request.VisibleColumns == null || Model.Request.VisibleColumns.Contains(columnId)) &&
+                    defaultOrder.Contains(columnId))
+                    {
+                        <th>@(Model.Request.ColumnNames?.GetValueOrDefault(columnId) ?? GetDefaultColumnName(columnId))</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Correspondences.Count; i++)
+            {
+                var correspondence = Model.Correspondences.ElementAt(i);
+                <tr>
+                    <td>@((i + 1).UseArabicDigits())</td>
+                    <td>@(correspondence.Subject?.UseArabicDigits() ?? "-")</td>
+
+                    @foreach (var columnId in columnOrder)
+                    {
+                        if (Model.Request.VisibleColumns == null || Model.Request.VisibleColumns.Contains(columnId))
+                        {
+                            switch (columnId)
+                            {
+                                case "direction":
+                                    <td class="nowrap">@GetDirectionName(correspondence.Direction)</td>
+                                    break;
+                                case "priorityLevel":
+                                    <td class="nowrap">@GetPriorityLevelName(correspondence.PriorityLevel)</td>
+                                    break;
+                                case "incomingNumber":
+                                    <td class="nowrap">@(correspondence.IncomingNumber?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "incomingDate":
+                                    <td class="nowrap">@(correspondence.IncomingDate?.FormatDate()?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "outgoingNumber":
+                                    <td class="nowrap">@(correspondence.OutgoingNumber?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "outgoingDate":
+                                    <td class="nowrap">@(correspondence.OutgoingDate?.FormatDate()?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "correspondentName":
+                                    <td>@(correspondence.CorrespondentName?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "departmentName":
+                                    <td>@(correspondence.DepartmentName?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "summary":
+                                    <td class="text-start">@(correspondence.Summary?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "responsibleUserName":
+                                    <td>@(correspondence.ResponsibleUserName?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "followUpUserName":
+                                    <td>@(correspondence.FollowUpUserName?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                                case "isClosed":
+                                    <td class="nowrap">@(correspondence.IsClosed ? "مغلق" : "مفتوح")</td>
+                                    break;
+                                case "classifications":
+                                    <td>@(correspondence.Classifications?.UseArabicDigits() ?? "-")</td>
+                                    break;
+                            }
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

@@ -10,7 +10,7 @@ public class CreateCorrespondenceFromImageRequest
     /// <summary>
     /// The image file (e.g., PNG, JPG) containing the correspondence text.
     /// </summary>
-    public IFormFile File { get; init; } = null!;
+    public IFormFile? File { get; init; } = null!;
 
     /// <summary>
     /// The ID of the correspondent who sent the document.

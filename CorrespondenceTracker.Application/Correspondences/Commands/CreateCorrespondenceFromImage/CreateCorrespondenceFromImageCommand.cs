@@ -1,6 +1,5 @@
 ﻿// CreateCorrespondenceFromImageCommand.cs
 
-using Ardalis.GuardClauses;
 using CorrespondenceTracker.Application.Interfaces;
 using CorrespondenceTracker.Data;
 using CorrespondenceTracker.Domain.Entities;
@@ -33,38 +32,50 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
 
         public async Task<CreateCorrespondenceFromImageResponse> Execute(CreateCorrespondenceFromImageRequest model)
         {
-            // 1. Validate input
-            Guard.Against.Null(model.File, nameof(model.File));
-            Guard.Against.Default(model.SenderId, nameof(model.SenderId));
 
             var correspondent = await _context.Correspondents.FindAsync(model.SenderId)
                 ?? throw new ArgumentException($"Correspondent with ID {model.SenderId} not found");
 
-            // 2. Save the file temporarily to get its path
-            FileData fileData = await _fileService.UploadFile(model.File);
+            // 2. Save the file 
+            FileRecord? fileRecord = null;
+            if (model.File != null)
+            {
+                FileData fileData = await _fileService.UploadFile(model.File);
+                fileRecord = new FileRecord(
+                    fileName: model.File.FileName,
+                    fullPath: fileData.FullPath,
+                    contentType: model.File.ContentType,
+                    extension: fileData.Extension,
+                    size: fileData.Size
+                );
+                await _context.FileRecords.AddAsync(fileRecord);
+            }
+
 
             // 3. Use Gemini services
-            string extractedText = await _ocrService.ExtractTextFromFileAsync(fileData.FullPath);
-            string summarizedText = await _summarizerService.SummarizeTextAsync(extractedText);
+            string? extractedText = null;
+            string? summarizedText = null;
+            if (fileRecord != null)
+            {
+                try
+                {
+                    extractedText = await _ocrService.ExtractTextFromFileAsync(fileRecord!.FullPath);
+                    summarizedText = await _summarizerService.SummarizeTextAsync(extractedText);
+                }
+                catch (Exception e)
+                {
+                    // TODO: Log exception
+                }
+            }
 
-            // 4. Create a permanent file record
-            var fileRecord = new FileRecord(
-                fileName: model.File.FileName,
-                fullPath: fileData.FullPath,
-                contentType: model.File.ContentType,
-                extension: fileData.Extension,
-                size: fileData.Size
-            );
-            await _context.FileRecords.AddAsync(fileRecord);
-
-            // 5. Create the new correspondence entity with default values
+            // Create the new correspondence entity with default values
             var correspondence = new Correspondence(
                 direction: CorrespondenceDirection.Incoming,
                 priorityLevel: PriorityLevel.Medium,
                 correspondentId: model.SenderId,
                 content: extractedText,
                 summary: summarizedText,
-                fileId: fileRecord.Id
+                fileId: fileRecord?.Id
             );
 
             _context.Correspondences.Add(correspondence);
@@ -76,7 +87,7 @@ namespace CorrespondenceTracker.Application.Correspondences.Commands.CreateCorre
                 Id = correspondence.Id,
                 Content = correspondence.Content ?? string.Empty,
                 Summary = correspondence.Summary ?? string.Empty,
-                FileId = correspondence.FileId.Value
+                FileId = correspondence?.FileId
             };
         }
     }

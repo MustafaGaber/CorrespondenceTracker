@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CorrespondenceTracker.Data.Migrations
 {
     [DbContext(typeof(CorrespondenceDatabaseContext))]
-    [Migration("20251030093018_Reminder")]
-    partial class Reminder
+    [Migration("20251102104528_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,9 +105,6 @@ namespace CorrespondenceTracker.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AssignedUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -124,6 +121,13 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<Guid?>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FinalAction")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("FollowUpUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("IncomingDate")
@@ -149,6 +153,9 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Property<int>("PriorityLevel")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("ResponsibleUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("SubjectId")
                         .HasColumnType("uniqueidentifier");
 
@@ -160,8 +167,6 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedUserId");
-
                     b.HasIndex("CorrespondentId");
 
                     b.HasIndex("DepartmentId");
@@ -169,6 +174,8 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasIndex("Direction");
 
                     b.HasIndex("FileId");
+
+                    b.HasIndex("FollowUpUserId");
 
                     b.HasIndex("IncomingDate");
 
@@ -178,7 +185,12 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasIndex("OutgoingNumber");
 
+                    b.HasIndex("ResponsibleUserId");
+
                     b.HasIndex("SubjectId");
+
+                    b.HasIndex("IsClosed", "PriorityLevel", "IncomingDate")
+                        .HasDatabaseName("IX_Correspondences_Open_Priority_Date");
 
                     b.ToTable("Correspondences", (string)null);
                 });
@@ -199,6 +211,9 @@ namespace CorrespondenceTracker.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -361,6 +376,9 @@ namespace CorrespondenceTracker.Data.Migrations
 
                     b.HasIndex("RemindTime");
 
+                    b.HasIndex("IsCompleted", "IsDismissed", "RemindTime")
+                        .HasDatabaseName("IX_Reminders_Active_RemindTime");
+
                     b.ToTable("Reminders", (string)null);
                 });
 
@@ -403,9 +421,18 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsFollowUpManager")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFollowUpUser")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobTitle")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("ReminderId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -413,6 +440,8 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FullName");
+
+                    b.HasIndex("ReminderId");
 
                     b.ToTable("Users", (string)null);
                 });
@@ -453,11 +482,6 @@ namespace CorrespondenceTracker.Data.Migrations
 
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Correspondence", b =>
                 {
-                    b.HasOne("CorrespondenceTracker.Domain.Entities.User", "AssignedUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("CorrespondenceTracker.Domain.Entities.Correspondent", "Correspondent")
                         .WithMany()
                         .HasForeignKey("CorrespondentId")
@@ -474,18 +498,30 @@ namespace CorrespondenceTracker.Data.Migrations
                         .HasForeignKey("FileId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.User", "FollowUpUser")
+                        .WithMany()
+                        .HasForeignKey("FollowUpUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.User", "ResponsibleUser")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("CorrespondenceTracker.Domain.Entities.Subject", "Subject")
                         .WithMany()
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AssignedUser");
 
                     b.Navigation("Correspondent");
 
                     b.Navigation("Department");
 
                     b.Navigation("File");
+
+                    b.Navigation("FollowUpUser");
+
+                    b.Navigation("ResponsibleUser");
 
                     b.Navigation("Subject");
                 });
@@ -526,6 +562,13 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Navigation("Correspondence");
                 });
 
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.User", b =>
+                {
+                    b.HasOne("CorrespondenceTracker.Domain.Entities.Reminder", null)
+                        .WithMany("UsersToRemind")
+                        .HasForeignKey("ReminderId");
+                });
+
             modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Correspondence", b =>
                 {
                     b.Navigation("Attachments");
@@ -533,6 +576,11 @@ namespace CorrespondenceTracker.Data.Migrations
                     b.Navigation("FollowUps");
 
                     b.Navigation("Reminders");
+                });
+
+            modelBuilder.Entity("CorrespondenceTracker.Domain.Entities.Reminder", b =>
+                {
+                    b.Navigation("UsersToRemind");
                 });
 #pragma warning restore 612, 618
         }
